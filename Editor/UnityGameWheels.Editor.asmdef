@@ -1,0 +1,10 @@
+{
+    "name": "UnityGameWheels.Editor",
+    "references": [
+        "UnityGameWheels"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": []
+}
