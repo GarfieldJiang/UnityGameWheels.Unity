@@ -17,25 +17,17 @@
         private const string CurrentLogFileName = "current.log";
         private const string PreviousLogFileName = "prev.log";
 
-        private const string InternalResourceVersionKeyFormat =
-            "COL.UnityGameWheels.Unity.Editor.AssetBundleBuilder.InternalResourceVersion_{0}_{1}";
+        private static readonly string InternalResourceVersionKeyFormat =
+            typeof(AssetBundleBuilder).FullName + ".InternalResourceVersion_{0}_{1}";
 
         private const string IndexFileName = Core.Asset.Constant.IndexFileName;
 
         private static string s_ConfigPath = null;
 
-        internal static string ConfigPath
-        {
-            get
-            {
-                if (s_ConfigPath == null)
-                {
-                    s_ConfigPath = Utility.Config.Read<AssetBundleBuilderConfigPathAttribute, string>() ?? DefaultConfigPath;
-                }
-
-                return s_ConfigPath;
-            }
-        }
+        internal static string ConfigPath =>
+            s_ConfigPath ?? (s_ConfigPath =
+                Utility.Config.Read<AssetBundleBuilderConfigPathAttribute, string>() ??
+                DefaultConfigPath);
 
         private static string s_DefaultWorkingDirectory = null;
 
@@ -45,47 +37,35 @@
             {
                 if (s_DefaultWorkingDirectory == null)
                 {
-                    var currectDirName = Path.GetFileName(Directory.GetCurrentDirectory());
+                    var currentDirName = Path.GetFileName(Directory.GetCurrentDirectory());
                     var parentDir = Directory.GetParent(Directory.GetCurrentDirectory());
-                    s_DefaultWorkingDirectory = Path.Combine(parentDir.FullName, currectDirName + "_AssetBundles");
+                    s_DefaultWorkingDirectory = Path.Combine(parentDir.FullName, currentDirName + "_AssetBundles");
                 }
 
                 return s_DefaultWorkingDirectory;
             }
         }
 
-        private string WorkingDirectory
-        {
-            get { return string.IsNullOrEmpty(m_Config.WorkingDirectory) ? DefaultWorkingDirectory : m_Config.WorkingDirectory; }
-        }
+        private string WorkingDirectory =>
+            string.IsNullOrEmpty(m_Config.WorkingDirectory)
+                ? DefaultWorkingDirectory
+                : m_Config.WorkingDirectory;
 
-        private string InternalDirectory
-        {
-            get { return Path.Combine(WorkingDirectory, InternalDirectoryName); }
-        }
+        private string InternalDirectory => Path.Combine(WorkingDirectory, InternalDirectoryName);
 
         private string GetPlatformInternalDirectory(ResourcePlatform targetPlatform)
         {
             return Path.Combine(InternalDirectory, targetPlatform.ToString());
         }
 
-        private string OutputDirectory
-        {
-            get { return Path.Combine(WorkingDirectory, OutputDirectoryName); }
-        }
+        private string OutputDirectory => Path.Combine(WorkingDirectory, OutputDirectoryName);
 
-        private string LogDirectory
-        {
-            get { return Path.Combine(WorkingDirectory, LogDirectoryName); }
-        }
+        private string LogDirectory => Path.Combine(WorkingDirectory, LogDirectoryName);
 
         private AssetBundleBuilderConfig m_Config = new AssetBundleBuilderConfig();
-        private XmlSerializer m_ConfigSerializer = new XmlSerializer(typeof(AssetBundleBuilderConfig));
+        private readonly XmlSerializer m_ConfigSerializer = new XmlSerializer(typeof(AssetBundleBuilderConfig));
 
-        public AssetBundleBuilderConfig Config
-        {
-            get { return m_Config; }
-        }
+        public AssetBundleBuilderConfig Config => m_Config;
 
         public AssetBundleBuilder()
         {
@@ -112,9 +92,12 @@
 
             if (m_Config.PlatformConfigs.Count <= 0)
             {
-                m_Config.PlatformConfigs.Add(new AssetBundleBuilderConfig.PlatformConfig {TargetPlatform = ResourcePlatform.Standalone});
-                m_Config.PlatformConfigs.Add(new AssetBundleBuilderConfig.PlatformConfig {TargetPlatform = ResourcePlatform.Android});
-                m_Config.PlatformConfigs.Add(new AssetBundleBuilderConfig.PlatformConfig {TargetPlatform = ResourcePlatform.iOS});
+                m_Config.PlatformConfigs.Add(new AssetBundleBuilderConfig.PlatformConfig
+                    {TargetPlatform = ResourcePlatform.Standalone});
+                m_Config.PlatformConfigs.Add(new AssetBundleBuilderConfig.PlatformConfig
+                    {TargetPlatform = ResourcePlatform.Android});
+                m_Config.PlatformConfigs.Add(new AssetBundleBuilderConfig.PlatformConfig
+                    {TargetPlatform = ResourcePlatform.iOS});
             }
         }
 
@@ -128,6 +111,22 @@
             AssetDatabase.ImportAsset(ConfigPath);
         }
 
+        private IAssetBundleBuilderHandler CreateHandler()
+        {
+            var type = Utility.Config.Read<ConfigReadAttribute, Type>();
+            if (type == null)
+            {
+                return new AssetBundleBuilderNullHandler();
+            }
+
+            if (type.IsAbstract || !type.IsClass || type.IsArray)
+            {
+                throw new InvalidOperationException($"Type '{type}' is not feasible.");
+            }
+
+            return (IAssetBundleBuilderHandler)Activator.CreateInstance(type);
+        }
+
         /// <summary>
         /// Build asset bundles for a given target resource platform.
         /// </summary>
@@ -139,17 +138,18 @@
             bool autoIncrementResourceVersion, BuildAssetBundleOptions buildOptions)
         {
             var logger = new Logger(this);
+            var handler = CreateHandler();
             try
             {
-                IDictionary<string, AssetInfo> assetInfos;
-                AssetBundleBuild[] buildMaps;
-                var assetBundleInfos = BeforeBuild(logger, out assetInfos, out buildMaps);
+                var assetBundleInfos = BeforeBuild(handler, logger, out var assetInfos, out var buildMaps);
 
                 DoBuildPlatform(targetPlatform, cleanUpWorkingDirectoryAfterBuild, autoIncrementResourceVersion,
-                    buildOptions, logger, buildMaps, assetBundleInfos, assetInfos);
+                    buildOptions, handler, logger, buildMaps, assetBundleInfos, assetInfos);
+                CallHandlerOnBuildSuccess(handler, logger);
             }
             catch (Exception e)
             {
+                CallHandlerOnBuildFailure(handler, logger);
                 logger.Error("{0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
                 throw;
             }
@@ -160,16 +160,15 @@
         }
 
         /// <summary>
-        /// Build all assetbundles according to config.
+        /// Build all asset bundles according to config.
         /// </summary>
         public void BuildAll()
         {
             var logger = new Logger(this);
+            var handler = CreateHandler();
             try
             {
-                IDictionary<string, AssetInfo> assetInfos;
-                AssetBundleBuild[] buildMaps;
-                var assetBundleInfos = BeforeBuild(logger, out assetInfos, out buildMaps);
+                var assetBundleInfos = BeforeBuild(handler, logger, out var assetInfos, out var buildMaps);
                 var cleanUpWorkingDirectoryAfterBuild = m_Config.CleanUpWorkingDirectoryAfterBuild;
 
                 foreach (var platformConfig in m_Config.PlatformConfigs)
@@ -184,11 +183,13 @@
 
                     DoBuildPlatform(platformConfig.TargetPlatform, cleanUpWorkingDirectoryAfterBuild,
                         platformConfig.AutomaticIncrementResourceVersion, m_Config.BuildAssetBundleOptions,
-                        logger, buildMaps, assetBundleInfos, assetInfos);
+                        handler, logger, buildMaps, assetBundleInfos, assetInfos);
+                    CallHandlerOnBuildSuccess(handler, logger);
                 }
             }
             catch (Exception e)
             {
+                CallHandlerOnBuildFailure(handler, logger);
                 logger.Error("{0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
                 throw;
             }
@@ -202,10 +203,12 @@
             bool cleanUpWorkingDirectoryAfterBuild,
             bool autoIncVersion,
             BuildAssetBundleOptions buildOptions,
+            IAssetBundleBuilderHandler handler,
             Logger logger, AssetBundleBuild[] buildMaps,
             IDictionary<string, AssetBundleInfo> assetBundleInfos,
             IDictionary<string, AssetInfo> assetInfos)
         {
+            CallHandlerOnPreBuildPlatform(handler, logger, targetPlatform);
             logger.Info("Start building for '{0}' target.", targetPlatform);
             logger.Info("Start building asset bundles.");
             var manifest = BuildAssetBundles(buildMaps, targetPlatform, buildOptions);
@@ -245,11 +248,15 @@
             }
 
             logger.Info("Finish building for '{0}' target.", targetPlatform);
+
+            CallHandlerOnPostBuildPlatform(handler, logger, targetPlatform, OutputDirectory);
         }
 
-        private IDictionary<string, AssetBundleInfo> BeforeBuild(Logger logger, out IDictionary<string, AssetInfo> assetInfos,
+        private IDictionary<string, AssetBundleInfo> BeforeBuild(IAssetBundleBuilderHandler handler, Logger logger,
+            out IDictionary<string, AssetInfo> assetInfos,
             out AssetBundleBuild[] buildMaps)
         {
+            CallHandlerOnPreBeforeBuild(handler, logger);
             logger.Info("Start populating asset bundle infos.");
             var provider = PopulateAssetBundleInfos();
             var assetBundleInfos = provider.AssetBundleInfos;
@@ -259,6 +266,7 @@
             logger.Info("Start generating unity build maps.");
             buildMaps = GenerateBuildMaps(assetBundleInfos);
             logger.Info("Finish generating unity build maps.");
+            CallHandlerOnPostBeforeBuild(handler, logger, buildMaps);
             return assetBundleInfos;
         }
 
@@ -348,7 +356,8 @@
                         Application.platform == RuntimePlatform.LinuxEditor ? BuildTarget.StandaloneLinuxUniversal :
                         BuildTarget.StandaloneOSX;
                 default:
-                    throw new ArgumentOutOfRangeException("ResourcePlatform", "Unsupported asset bundle platform " + ResourcePlatform);
+                    throw new ArgumentOutOfRangeException(nameof(ResourcePlatform),
+                        "Unsupported asset bundle platform " + ResourcePlatform);
             }
         }
 
@@ -369,14 +378,16 @@
                 GetBuildTargetFromResourcePlatform(targetPlatform));
         }
 
-        private void CleanUpInternalDirectory(ResourcePlatform targetPlatform, IDictionary<string, AssetBundleInfo> assetBundleInfos)
+        private void CleanUpInternalDirectory(ResourcePlatform targetPlatform,
+            IDictionary<string, AssetBundleInfo> assetBundleInfos)
         {
             var platformInternalDir = GetPlatformInternalDirectory(targetPlatform);
             var directoryInfo = Directory.CreateDirectory(platformInternalDir);
             var directoryUrl = new Uri(directoryInfo.FullName + Path.DirectorySeparatorChar, UriKind.Absolute);
             foreach (var fileInfo in directoryInfo.GetFiles("*", SearchOption.AllDirectories))
             {
-                if (fileInfo.Extension == ".manifest" || fileInfo.FullName == Path.Combine(directoryInfo.FullName, directoryInfo.Name))
+                if (fileInfo.Extension == ".manifest" ||
+                    fileInfo.FullName == Path.Combine(directoryInfo.FullName, directoryInfo.Name))
                 {
                     continue;
                 }
@@ -417,15 +428,17 @@
             return Mathf.Max(ret, 1);
         }
 
-        public static void SetInternalResourceVersion(string bundleVersion, ResourcePlatform targetPlatform, int internalResourceVersion)
+        public static void SetInternalResourceVersion(string bundleVersion, ResourcePlatform targetPlatform,
+            int internalResourceVersion)
         {
             if (internalResourceVersion <= 0)
             {
-                throw new ArgumentOutOfRangeException("internalResourceVersion",
+                throw new ArgumentOutOfRangeException(nameof(internalResourceVersion),
                     Core.Utility.Text.Format("Should be positive, but is {0}.", internalResourceVersion));
             }
 
-            PlayerPrefs.SetInt(Core.Utility.Text.Format(InternalResourceVersionKeyFormat, bundleVersion, targetPlatform.ToString()),
+            PlayerPrefs.SetInt(
+                Core.Utility.Text.Format(InternalResourceVersionKeyFormat, bundleVersion, targetPlatform.ToString()),
                 internalResourceVersion);
             PlayerPrefs.Save();
         }
@@ -440,5 +453,84 @@
             BuildAssetBundleOptions.ForceRebuildAssetBundle,
             BuildAssetBundleOptions.IgnoreTypeTreeChanges,
         };
+
+        private static void CallHandlerOnBuildFailure(IAssetBundleBuilderHandler handler, Logger logger)
+        {
+            try
+            {
+                logger.Info("Trigger OnBuildFailure in handler.");
+                handler.OnBuildFailure();
+            }
+            catch (Exception e)
+            {
+                logger.Error($"Exception from OnBuildFailure: {e}");
+            }
+        }
+
+        private static void CallHandlerOnBuildSuccess(IAssetBundleBuilderHandler handler, Logger logger)
+        {
+            try
+            {
+                logger.Info("Trigger OnBuildSuccess in handler.");
+                handler.OnBuildSuccess();
+            }
+            catch (Exception e)
+            {
+                logger.Error($"Exception from OnBuildSuccess: {e}");
+            }
+        }
+
+        private static void CallHandlerOnPreBeforeBuild(IAssetBundleBuilderHandler handler, Logger logger)
+        {
+            try
+            {
+                logger.Info("Trigger OnPreBeforeBuild in handler.");
+                handler.OnPreBeforeBuild();
+            }
+            catch (Exception e)
+            {
+                logger.Error($"Exception from OnPreBeforeBuild: {e}");
+            }
+        }
+
+        private static void CallHandlerOnPostBeforeBuild(IAssetBundleBuilderHandler handler, Logger logger, AssetBundleBuild[] assetBundleBuilds)
+        {
+            try
+            {
+                logger.Info("Trigger OnPostBeforeBuild in handler.");
+                handler.OnPostBeforeBuild(assetBundleBuilds);
+            }
+            catch (Exception e)
+            {
+                logger.Error($"Exception from OnPreBeforeBuild: {e}");
+            }
+        }
+
+        private void CallHandlerOnPreBuildPlatform(IAssetBundleBuilderHandler handler, Logger logger, ResourcePlatform resourcePlatform)
+        {
+            try
+            {
+                logger.Info("Trigger OnPreBuildPlatform in handler.");
+                handler.OnPreBuildPlatform(resourcePlatform);
+            }
+            catch (Exception e)
+            {
+                logger.Error($"Exception from OnPreBuildPlatform: {e}");
+            }
+        }
+
+        private void CallHandlerOnPostBuildPlatform(IAssetBundleBuilderHandler handler, Logger logger, ResourcePlatform resourcePlatform,
+            string outputDirectory)
+        {
+            try
+            {
+                logger.Info("Trigger OnPostBuildPlatform in handler.");
+                handler.OnPostBuildPlatform(resourcePlatform, outputDirectory);
+            }
+            catch (Exception e)
+            {
+                logger.Error($"Exception from OnPostBuildPlatform: {e}");
+            }
+        }
     }
 }
