@@ -95,7 +95,7 @@
 
         private void DrawResources()
         {
-            if (!DrawSectionHeader(ResourceCacheQueriesFoldoutKey, "Asset Bundles ({0})", m_ResourceCacheQueries.Count))
+            if (!DrawSectionHeader(ResourceCacheQueriesFoldoutKey, "Asset Bundles: ({0})", m_ResourceCacheQueries.Count))
             {
                 return;
             }
