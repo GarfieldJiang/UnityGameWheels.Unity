@@ -32,7 +32,7 @@
                 {
                     var src = Path.Combine(m_Builder.GetPlatformInternalDirectory(targetPlatform), assetBundleInfoForIndex.Path);
                     var dst = Core.Utility.Text.Format("{0}_{1}{2}", Path.Combine(directoryPath, assetBundleInfoForIndex.Path),
-                        (uint) assetBundleInfoForIndex.Crc32, Core.Asset.Constant.ResourceFileExtension);
+                        assetBundleInfoForIndex.Crc32, Core.Asset.Constant.ResourceFileExtension);
                     Directory.CreateDirectory(Path.GetDirectoryName(dst));
                     File.Copy(src, dst);
                 }
@@ -49,19 +49,19 @@
 
                 foreach (var abi in assetBundleInfosForIndex)
                 {
-                    assetIndex.ResourceInfos.Add(abi.Path, (Core.Asset.ResourceInfo) abi);
-                    assetIndex.ResourceBasicInfos.Add(abi.Path, (Core.Asset.ResourceBasicInfo) abi);
+                    assetIndex.ResourceInfos.Add(abi.Path, (Core.Asset.ResourceInfo)abi);
+                    assetIndex.ResourceBasicInfos.Add(abi.Path, (Core.Asset.ResourceBasicInfo)abi);
                 }
 
                 GenerateResourceGroupInfos(assetIndex.ResourceBasicInfos, assetIndex.ResourceGroupInfos);
 
                 foreach (var originalAssetInfo in assetInfos.Values)
                 {
-                    var assetInfo = (Core.Asset.AssetInfo) originalAssetInfo;
+                    var assetInfo = (Core.Asset.AssetInfo)originalAssetInfo;
                     assetIndex.AssetInfos.Add(assetInfo.Path, assetInfo);
                 }
 
-                GenerateResourceDependencyInfos(assetIndex.AssetInfos, assetIndex.ResourceInfos);
+                GenerateResourceDependencyInfos(assetIndex.AssetInfos, assetIndex.ResourceBasicInfos);
 
                 using (var fs = File.Create(indexPath))
                 {
@@ -78,7 +78,7 @@
                 }
 
                 var newIndexName = Core.Utility.Text.Format(
-                    "{0}_{1}{2}", Path.GetFileNameWithoutExtension(IndexFileName), (uint) crc32, Path.GetExtension(IndexFileName));
+                    "{0}_{1}{2}", Path.GetFileNameWithoutExtension(IndexFileName), (uint)crc32, Path.GetExtension(IndexFileName));
                 var newIndexPath = Path.Combine(Path.GetDirectoryName(indexPath), newIndexName);
                 File.Move(indexPath, newIndexPath);
 

@@ -41,15 +41,15 @@
             }
 
             protected abstract void GenerateIndex(string bundleVersion, ResourcePlatform targetPlatform, int internalResourceVersion,
-                                                  IList<AssetBundleInfoForIndex> assetBundleInfosForIndex,
-                                                  IDictionary<string, AssetInfo> assetInfos, string indexPath);
+                IList<AssetBundleInfoForIndex> assetBundleInfosForIndex,
+                IDictionary<string, AssetInfo> assetInfos, string indexPath);
 
             protected abstract void CopyFiles(ResourcePlatform targetPlatform, IList<AssetBundleInfoForIndex> assetBundleInfosForIndex,
-                                              string directoryPath);
+                string directoryPath);
 
             public void Run(string bundleVersion, ResourcePlatform targetPlatform, int internalResourceVersion,
-                            IList<AssetBundleInfoForIndex> assetBundleInfosForIndex,
-                            IDictionary<string, AssetInfo> assetInfos)
+                IList<AssetBundleInfoForIndex> assetBundleInfosForIndex,
+                IDictionary<string, AssetInfo> assetInfos)
             {
                 var directoryPath = CalculateDirectoryPath(bundleVersion, targetPlatform, internalResourceVersion);
 
@@ -65,7 +65,8 @@
                 CopyFiles(targetPlatform, assetBundleInfosForIndex, directoryPath);
             }
 
-            protected static void GenerateResourceGroupInfos(IDictionary<string, ResourceBasicInfo> resourceBasicInfos, IList<ResourceGroupInfo> resourceGroupInfos)
+            protected static void GenerateResourceGroupInfos(IDictionary<string, ResourceBasicInfo> resourceBasicInfos,
+                IList<ResourceGroupInfo> resourceGroupInfos)
             {
                 resourceGroupInfos.Clear();
                 List<ResourceGroupInfo> internalResourceGroupInfos = new List<ResourceGroupInfo>();
@@ -74,7 +75,7 @@
                     int index = internalResourceGroupInfos.FindIndex(resourceGroupInfo => resourceGroupInfo.GroupId == resourceInfo.GroupId);
                     if (index < 0)
                     {
-                        internalResourceGroupInfos.Add(new ResourceGroupInfo { GroupId = resourceInfo.GroupId });
+                        internalResourceGroupInfos.Add(new ResourceGroupInfo {GroupId = resourceInfo.GroupId});
                         index = internalResourceGroupInfos.Count - 1;
                     }
 
@@ -89,20 +90,25 @@
             }
 
             protected static void GenerateResourceDependencyInfos(IDictionary<string, Core.Asset.AssetInfo> assetInfos,
-                IDictionary<string, Core.Asset.ResourceInfo> resourceInfos)
+                IDictionary<string, ResourceBasicInfo> resourceBasicInfos)
             {
                 foreach (var assetInfo in assetInfos.Values)
                 {
                     var resPath = assetInfo.ResourcePath;
                     foreach (var depAssetPath in assetInfo.DependencyAssetPaths)
                     {
+                        if (!assetInfos.ContainsKey(depAssetPath))
+                        {
+                            throw new KeyNotFoundException($"'{assetInfo.Path} depends on '{depAssetPath}' but the latter cannot be found.");
+                        }
+
                         var depResPath = assetInfos[depAssetPath].ResourcePath;
                         if (resPath == depResPath)
                         {
                             continue;
                         }
-                        var depRes = resourceInfos[depResPath];
-                        depRes.DependingResourcePaths.Add(resPath);
+
+                        resourceBasicInfos[depResPath].DependingResourcePaths.Add(resPath);
                     }
                 }
             }

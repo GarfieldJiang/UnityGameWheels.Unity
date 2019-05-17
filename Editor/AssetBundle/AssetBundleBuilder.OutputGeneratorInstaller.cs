@@ -53,26 +53,33 @@
                 assetIndex.Platform = targetPlatform.ToString();
                 assetIndex.InternalAssetVersion = internalResourceVersion;
 
-                foreach (var abi in assetBundleInfosForIndex.Where(abi => !abi.DontPack))
+                foreach (var abi in assetBundleInfosForIndex)
                 {
-                    assetIndex.ResourceInfos.Add(abi.Path, (Core.Asset.ResourceInfo) abi);
-                    assetIndex.ResourceBasicInfos.Add(abi.Path, (Core.Asset.ResourceBasicInfo) abi);
+                    if (!abi.DontPack)
+                    {
+                        assetIndex.ResourceInfos.Add(abi.Path, (Core.Asset.ResourceInfo)abi);
+                    }
+
+                    assetIndex.ResourceBasicInfos.Add(abi.Path, (Core.Asset.ResourceBasicInfo)abi);
                 }
 
                 GenerateResourceGroupInfos(assetIndex.ResourceBasicInfos, assetIndex.ResourceGroupInfos);
+                var fullAssetInfos = new Dictionary<string, Core.Asset.AssetInfo>();
 
                 foreach (var originalAssetInfo in assetInfos.Values)
                 {
+                    var assetInfo = (Core.Asset.AssetInfo)originalAssetInfo;
+                    fullAssetInfos.Add(assetInfo.Path, assetInfo);
+
                     if (!assetIndex.ResourceInfos.ContainsKey(originalAssetInfo.AssetBundlePath))
                     {
                         continue;
                     }
 
-                    var assetInfo = (Core.Asset.AssetInfo) originalAssetInfo;
                     assetIndex.AssetInfos.Add(assetInfo.Path, assetInfo);
                 }
 
-                GenerateResourceDependencyInfos(assetIndex.AssetInfos, assetIndex.ResourceInfos);
+                GenerateResourceDependencyInfos(fullAssetInfos, assetIndex.ResourceBasicInfos);
 
                 using (var fs = File.Create(indexPath))
                 {
