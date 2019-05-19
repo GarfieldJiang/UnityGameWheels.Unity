@@ -10,17 +10,10 @@
     {
         private class OutputGeneratorRemote : OutputGeneratorBase
         {
-            protected override int IndexVersion
-            {
-                get { return 1; }
-            }
+            protected override int IndexVersion => 1;
 
-            protected override string GeneratorDirectoryName
-            {
-                get { return "Server"; }
-            }
-
-            public OutputGeneratorRemote(AssetBundleBuilder builder) : base(builder)
+            public OutputGeneratorRemote(AssetBundleBuilder builder, string generatorDirectoryName)
+                : base(builder, generatorDirectoryName)
             {
                 // Empty.
             }

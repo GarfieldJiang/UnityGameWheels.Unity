@@ -407,13 +407,19 @@
         private void GenerateOutput(string bundleVersion, ResourcePlatform targetPlatform, int internalResourceVersion,
             IList<AssetBundleInfoForIndex> assetBundleInfosForIndex, IDictionary<string, AssetInfo> assetInfos)
         {
-            new OutputGeneratorInstaller(this).Run(
+            new OutputGeneratorInstaller(this, "Client", true).Run(
                 bundleVersion,
                 targetPlatform,
                 internalResourceVersion,
                 assetBundleInfosForIndex,
                 assetInfos);
-            new OutputGeneratorRemote(this).Run(
+            new OutputGeneratorInstaller(this, "ClientFull", false).Run(
+                bundleVersion,
+                targetPlatform,
+                internalResourceVersion,
+                assetBundleInfosForIndex,
+                assetInfos);
+            new OutputGeneratorRemote(this, "Server").Run(
                 bundleVersion,
                 targetPlatform,
                 internalResourceVersion,

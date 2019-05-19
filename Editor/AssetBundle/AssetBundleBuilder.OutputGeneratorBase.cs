@@ -10,15 +10,16 @@
     {
         private abstract class OutputGeneratorBase
         {
-            protected AssetBundleBuilder m_Builder = null;
+            protected readonly AssetBundleBuilder m_Builder = null;
 
             protected abstract int IndexVersion { get; }
 
-            protected abstract string GeneratorDirectoryName { get; }
+            private string GeneratorDirectoryName { get; }
 
-            public OutputGeneratorBase(AssetBundleBuilder builder)
+            public OutputGeneratorBase(AssetBundleBuilder builder, string generatorDirectoryName)
             {
                 m_Builder = builder;
+                GeneratorDirectoryName = generatorDirectoryName;
             }
 
             private string CalculateDirectoryPath(string bundleVersion, ResourcePlatform targetPlatform, int internalResourceVersion)

@@ -1,4 +1,6 @@
-﻿namespace COL.UnityGameWheels.Unity.Editor
+﻿using System;
+
+namespace COL.UnityGameWheels.Unity.Editor
 {
     using Asset;
     using Newtonsoft.Json;
@@ -11,19 +13,14 @@
     {
         private class OutputGeneratorInstaller : OutputGeneratorBase
         {
-            protected override int IndexVersion
-            {
-                get { return 1; }
-            }
+            protected override int IndexVersion => 1;
 
-            protected override string GeneratorDirectoryName
-            {
-                get { return "Client"; }
-            }
+            private readonly bool m_ConsiderDontPackFlag;
 
-            public OutputGeneratorInstaller(AssetBundleBuilder builder) : base(builder)
+            public OutputGeneratorInstaller(AssetBundleBuilder builder,
+                string generatorDirectoryName, bool considerDontPackFlag) : base(builder, generatorDirectoryName)
             {
-                // Empty.
+                m_ConsiderDontPackFlag = considerDontPackFlag;
             }
 
             protected override void CopyFiles(ResourcePlatform targetPlatform, IList<AssetBundleInfoForIndex> assetBundleInfosForIndex,
@@ -31,17 +28,22 @@
             {
                 foreach (var assetBundleInfoForIndex in assetBundleInfosForIndex)
                 {
-                    if (assetBundleInfoForIndex.DontPack)
+                    if (m_ConsiderDontPackFlag && assetBundleInfoForIndex.DontPack)
                     {
                         continue;
                     }
 
-                    var src = Path.Combine(m_Builder.GetPlatformInternalDirectory(targetPlatform), assetBundleInfoForIndex.Path);
-                    var dst = Core.Utility.Text.Format("{0}{1}", Path.Combine(directoryPath, assetBundleInfoForIndex.Path),
-                        Core.Asset.Constant.ResourceFileExtension);
-                    Directory.CreateDirectory(Path.GetDirectoryName(dst));
-                    File.Copy(src, dst);
+                    CopyAssetBundle(targetPlatform, directoryPath, assetBundleInfoForIndex);
                 }
+            }
+
+            private void CopyAssetBundle(ResourcePlatform targetPlatform, string directoryPath, AssetBundleInfoForIndex assetBundleInfoForIndex)
+            {
+                var src = Path.Combine(m_Builder.GetPlatformInternalDirectory(targetPlatform), assetBundleInfoForIndex.Path);
+                var dst = Core.Utility.Text.Format("{0}{1}", Path.Combine(directoryPath, assetBundleInfoForIndex.Path),
+                    Core.Asset.Constant.ResourceFileExtension);
+                Directory.CreateDirectory(Path.GetDirectoryName(dst));
+                File.Copy(src, dst);
             }
 
             protected override void GenerateIndex(string bundleVersion, ResourcePlatform targetPlatform, int internalResourceVersion,
@@ -55,7 +57,7 @@
 
                 foreach (var abi in assetBundleInfosForIndex)
                 {
-                    if (!abi.DontPack)
+                    if (!m_ConsiderDontPackFlag || !abi.DontPack)
                     {
                         assetIndex.ResourceInfos.Add(abi.Path, (Core.Asset.ResourceInfo)abi);
                     }
