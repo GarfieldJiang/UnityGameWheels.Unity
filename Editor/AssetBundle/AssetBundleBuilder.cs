@@ -1,4 +1,6 @@
-﻿namespace COL.UnityGameWheels.Unity.Editor
+﻿using System.Text.RegularExpressions;
+
+namespace COL.UnityGameWheels.Unity.Editor
 {
     using Asset;
     using System;
@@ -16,6 +18,7 @@
         private const string LogDirectoryName = "Log";
         private const string CurrentLogFileName = "current.log";
         private const string PreviousLogFileName = "prev.log";
+        private const string AssetBundleSuffix = ".assetbundle";
 
         private static readonly string InternalResourceVersionKeyFormat =
             typeof(AssetBundleBuilder).FullName + ".InternalResourceVersion_{0}_{1}";
@@ -290,7 +293,7 @@
             {
                 var assetBundlePath = assetBundleInfo.Path;
                 var fileInfo = new FileInfo(Path.Combine(
-                    GetPlatformInternalDirectory(targetPlatform), assetBundlePath));
+                    GetPlatformInternalDirectory(targetPlatform), assetBundlePath + AssetBundleSuffix));
                 var fileSize = fileInfo.Length;
                 int groupId = assetBundleInfo.GroupId;
                 uint crc32;
@@ -299,7 +302,7 @@
                     crc32 = Core.Algorithm.Crc32.Sum(fs);
                 }
 
-                Hash128 hash = manifest.GetAssetBundleHash(assetBundlePath);
+                Hash128 hash = manifest.GetAssetBundleHash(assetBundlePath + AssetBundleSuffix);
 
                 ret.Add(new AssetBundleInfoForIndex
                 {
@@ -334,7 +337,7 @@
 
                 var buildMap = new AssetBundleBuild
                 {
-                    assetBundleName = abInfo.Path,
+                    assetBundleName = abInfo.Path + AssetBundleSuffix,
                     assetNames = abInfo.AssetGuids.ConvertAll(guid => AssetDatabase.GUIDToAssetPath(guid)).ToArray()
                 };
                 buildMaps.Add(buildMap);
@@ -361,7 +364,7 @@
             }
         }
 
-        private AssetBundleManifest BuildAssetBundles(AssetBundleBuild[] buildMaps, ResourcePlatform targetPlatform,
+        private AssetBundleManifest BuildAssetBundles(AssetBundleBuild[] buildMap, ResourcePlatform targetPlatform,
             BuildAssetBundleOptions buildOptions)
         {
             var platformInternalDir = GetPlatformInternalDirectory(targetPlatform);
@@ -374,7 +377,7 @@
             }
 
             return BuildPipeline.BuildAssetBundles(
-                platformInternalDir, buildMaps, newBuildOptions,
+                platformInternalDir, buildMap, newBuildOptions,
                 GetBuildTargetFromResourcePlatform(targetPlatform));
         }
 
@@ -393,7 +396,7 @@
                 }
 
                 var fileInfoUrl = new Uri(fileInfo.FullName, UriKind.Absolute);
-                var relativePath = directoryUrl.MakeRelativeUri(fileInfoUrl).ToString();
+                var relativePath = Regex.Replace(directoryUrl.MakeRelativeUri(fileInfoUrl).ToString(), AssetBundleSuffix + "$", string.Empty);
                 if (!assetBundleInfos.ContainsKey(relativePath))
                 {
                     fileInfo.Delete();

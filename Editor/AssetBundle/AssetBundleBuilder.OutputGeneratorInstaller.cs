@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace COL.UnityGameWheels.Unity.Editor
+﻿namespace COL.UnityGameWheels.Unity.Editor
 {
     using Asset;
     using Newtonsoft.Json;
@@ -39,7 +37,7 @@ namespace COL.UnityGameWheels.Unity.Editor
 
             private void CopyAssetBundle(ResourcePlatform targetPlatform, string directoryPath, AssetBundleInfoForIndex assetBundleInfoForIndex)
             {
-                var src = Path.Combine(m_Builder.GetPlatformInternalDirectory(targetPlatform), assetBundleInfoForIndex.Path);
+                var src = Path.Combine(m_Builder.GetPlatformInternalDirectory(targetPlatform), assetBundleInfoForIndex.Path + AssetBundleSuffix);
                 var dst = Core.Utility.Text.Format("{0}{1}", Path.Combine(directoryPath, assetBundleInfoForIndex.Path),
                     Core.Asset.Constant.ResourceFileExtension);
                 Directory.CreateDirectory(Path.GetDirectoryName(dst));

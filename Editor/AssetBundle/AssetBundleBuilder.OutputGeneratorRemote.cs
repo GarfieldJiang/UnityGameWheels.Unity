@@ -23,7 +23,7 @@
             {
                 foreach (var assetBundleInfoForIndex in assetBundleInfosForIndex)
                 {
-                    var src = Path.Combine(m_Builder.GetPlatformInternalDirectory(targetPlatform), assetBundleInfoForIndex.Path);
+                    var src = Path.Combine(m_Builder.GetPlatformInternalDirectory(targetPlatform), assetBundleInfoForIndex.Path + AssetBundleSuffix);
                     var dst = Core.Utility.Text.Format("{0}_{1}{2}", Path.Combine(directoryPath, assetBundleInfoForIndex.Path),
                         assetBundleInfoForIndex.Crc32, Core.Asset.Constant.ResourceFileExtension);
                     Directory.CreateDirectory(Path.GetDirectoryName(dst));
