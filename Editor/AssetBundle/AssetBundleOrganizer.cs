@@ -301,6 +301,7 @@ namespace COL.UnityGameWheels.Unity.Editor
             foreach (var toRemove in m_ConfigCache.AssetInfos.Values.Where(ai => ai.AssetBundlePath == assetBundlePath).ToList())
             {
                 m_ConfigCache.AssetInfos.Remove(toRemove.Guid);
+                m_IncludedAssetGuidToInfoMap[toRemove.Guid].AssetBundlePath = string.Empty;
             }
 
             m_ConfigCache.AssetBundleInfos.Remove(assetBundlePath);
