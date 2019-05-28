@@ -28,9 +28,14 @@ namespace COL.UnityGameWheels.Unity.Editor
                 {
                     EditorGUILayout.Space();
 
-                    if (GUILayout.Button("Clean Up"))
+                    if (GUILayout.Button(new GUIContent("Clean Up", "Clean up missing assets.")))
                     {
                         CleanUp();
+                    }
+
+                    if (GUILayout.Button(new GUIContent("Check Consistency", "Check config data consistency. For debug use.")))
+                    {
+                        CheckConsistency();
                     }
 
                     if (GUILayout.Button("Check Dependency Legality"))
@@ -44,7 +49,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                         GUIUtility.ExitGUI();
                     }
 
-                    if (GUILayout.Button("Build..."))
+                    if (GUILayout.Button(new GUIContent("Build...", "Open the build window.")))
                     {
                         m_EditorWindow.m_ShouldClose = true;
                         OpenBuildWindow();
@@ -53,6 +58,52 @@ namespace COL.UnityGameWheels.Unity.Editor
                     EditorGUILayout.Space();
                 }
                 EditorGUILayout.EndHorizontal();
+            }
+
+            private void CheckConsistency()
+            {
+                var sb = new StringBuilder();
+                sb.AppendLine("Consistency problems:");
+                bool everythingOkay = CheckConsistencyFromAssetBundleSide(sb);
+
+                if (!everythingOkay)
+                {
+                    Debug.LogWarning(sb.ToString());
+                    EditorUtility.DisplayDialog("Consistency checking", "Problems found. See console log for details.", "Okay");
+                }
+                else
+                {
+                    EditorUtility.DisplayDialog("Consistency checking", "Seems everything is fine.", "Okay");
+                }
+            }
+
+            private bool CheckConsistencyFromAssetBundleSide(StringBuilder logBuilder)
+            {
+                var everythingOkay = true;
+                foreach (var kv in Organizer.ConfigCache.AssetBundleInfos)
+                {
+                    var assetBundleInfo = kv.Value;
+                    foreach (var assetGuid in assetBundleInfo.AssetGuids)
+                    {
+                        var assetInfo = Organizer.GetAssetInfo(assetGuid);
+                        if (assetInfo == null)
+                        {
+                            everythingOkay = false;
+                            logBuilder.AppendLine(
+                                $"Asset with GUID '{assetGuid}' not found in asset infos but is in asset bundle '{assetBundleInfo.AssetBundlePath}'");
+                        }
+                        else if (assetInfo.AssetBundlePath != assetBundleInfo.AssetBundlePath)
+                        {
+                            everythingOkay = false;
+                            var assetPath = assetInfo.Path;
+                            logBuilder.AppendLine(
+                                $"Asset '{assetPath}' (GUID='{assetGuid}') thinks its in asset bundle '{assetInfo.AssetBundlePath}', " +
+                                $"but asset bundle '{assetBundleInfo.AssetBundlePath}' claims to include it.");
+                        }
+                    }
+                }
+
+                return everythingOkay;
             }
 
             private void CleanUp()
@@ -92,6 +143,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                             sb.Append(", ");
                             sb.Append(AssetDatabase.GUIDToAssetPath(scc[i].Guid));
                         }
+
                         sb.Append("]\n");
                     }
 
@@ -115,8 +167,8 @@ namespace COL.UnityGameWheels.Unity.Editor
                         var secondAssetInfo = pair.Value;
                         var secondABInfo = abInfos[secondAssetInfo.AssetBundlePath];
                         sb.AppendFormat("'{0}' (AssetBundle '{1}' in Group {2}) --> '{3}' (AssetBundle '{4}' in Group {5})\n",
-                                        AssetDatabase.GUIDToAssetPath(firstAssetInfo.Guid), firstAssetInfo.AssetBundlePath, firstABInfo.GroupId,
-                                        AssetDatabase.GUIDToAssetPath(secondAssetInfo.Guid), secondAssetInfo.AssetBundlePath, secondABInfo.GroupId);
+                            AssetDatabase.GUIDToAssetPath(firstAssetInfo.Guid), firstAssetInfo.AssetBundlePath, firstABInfo.GroupId,
+                            AssetDatabase.GUIDToAssetPath(secondAssetInfo.Guid), secondAssetInfo.AssetBundlePath, secondABInfo.GroupId);
                     }
 
                     Debug.LogWarning(sb.ToString());

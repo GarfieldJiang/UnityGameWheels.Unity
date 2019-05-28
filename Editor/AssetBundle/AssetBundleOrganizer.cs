@@ -38,22 +38,22 @@ namespace COL.UnityGameWheels.Unity.Editor
             get { return m_ConfigCache; }
         }
 
-        private List<AssetInfo> m_AssetInfoForestRoots = new List<AssetInfo>();
+        private readonly List<AssetInfo> m_AssetInfoForestRoots = new List<AssetInfo>();
 
         public IList<AssetInfo> AssetInfoForestRoots
         {
             get { return m_AssetInfoForestRoots.AsReadOnly(); }
         }
 
-        private AssetBundleInfo m_AssetBundleInfoTreeRoot = new AssetBundleInfo {IsDirectory = true, Parent = null, Path = string.Empty};
+        private readonly AssetBundleInfo m_AssetBundleInfoTreeRoot = new AssetBundleInfo {IsDirectory = true, Parent = null, Path = string.Empty};
 
         public AssetBundleInfo AssetBundleInfoTreeRoot
         {
             get { return m_AssetBundleInfoTreeRoot; }
         }
 
-        private Dictionary<string, AssetInfo> m_IncludedAssetGuidToInfoMap = new Dictionary<string, AssetInfo>();
-        private XmlSerializer m_ConfigSerializer = new XmlSerializer(typeof(AssetBundleOrganizerConfig));
+        private readonly Dictionary<string, AssetInfo> m_IncludedAssetGuidToInfoMap = new Dictionary<string, AssetInfo>();
+        public XmlSerializer m_ConfigSerializer = new XmlSerializer(typeof(AssetBundleOrganizerConfig));
 
         public AssetBundleOrganizer()
         {
@@ -74,7 +74,7 @@ namespace COL.UnityGameWheels.Unity.Editor
 
             using (var sr = new StreamReader(ConfigPath))
             {
-                m_Config = (AssetBundleOrganizerConfig) m_ConfigSerializer.Deserialize(sr);
+                m_Config = (AssetBundleOrganizerConfig)m_ConfigSerializer.Deserialize(sr);
             }
 
             m_ConfigCache = new AssetBundleOrganizerConfigCache(m_Config);
