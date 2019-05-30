@@ -253,6 +253,8 @@
             Module.UnloadAsset(assetAccessor);
         }
 
+        public bool IsLoadingAnyAsset => Module?.IsLoadingAnyAsset ?? false;
+
         public void RequestUnloadUnusedAssetBundles()
         {
             Module.RequestUnloadUnusedResources();

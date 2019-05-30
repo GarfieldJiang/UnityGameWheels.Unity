@@ -24,6 +24,8 @@
 
         void UnloadAsset(IAssetAccessor assetAccessor);
 
+        bool IsLoadingAnyAsset { get; }
+
         void RequestUnloadUnusedAssetBundles();
 
         void UnloadUnusedAssets();

@@ -169,6 +169,8 @@ namespace COL.UnityGameWheels.Unity.Asset
             return ret;
         }
 
+        public bool IsLoadingAnyAsset => false;
+
         public void Prepare(AssetModulePrepareCallbackSet callbackSet, object context)
         {
             MonoBehaviour.StartCoroutine(PrepareCo(callbackSet, context));
@@ -190,7 +192,7 @@ namespace COL.UnityGameWheels.Unity.Asset
 
         public void UnloadAsset(IAssetAccessor assetAccessor)
         {
-            var dummyAssetAccessor = (DummyAssetAccessor) assetAccessor;
+            var dummyAssetAccessor = (DummyAssetAccessor)assetAccessor;
             dummyAssetAccessor.AssetObject = null;
             dummyAssetAccessor.AssetPath = null;
             dummyAssetAccessor.Status = AssetAccessorStatus.None;

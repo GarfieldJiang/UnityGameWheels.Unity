@@ -73,23 +73,26 @@
 
         private void DrawQueries()
         {
-            if (Time.unscaledTime - m_LastRefreshTime > ((AssetManager)target).InspectorQueryRefreshInterval)
+            var assetManager = (AssetManager)target;
+            if (Time.unscaledTime - m_LastRefreshTime > assetManager.InspectorQueryRefreshInterval)
             {
                 RefreshQueries();
                 m_NeedRefreshView = true;
             }
 
             EditorGUILayout.LabelField("Asset and Asset Bundle states", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Any asset is being loaded: " + assetManager.IsLoadingAnyAsset);
             DrawResources();
             DrawAssets();
         }
 
         private void RefreshQueries()
         {
+            var assetManager = (AssetManager)target;
             m_LastRefreshTime = Time.unscaledTime;
-            m_AssetCacheQueries = (target as AssetManager).GetAssetCacheQueries().Values.ToList();
+            m_AssetCacheQueries = assetManager.GetAssetCacheQueries().Values.ToList();
             m_AssetCacheQueries.Sort((a, b) => a.Path.CompareTo(b.Path));
-            m_ResourceCacheQueries = (target as AssetManager).GetResourceCacheQueries().Values.ToList();
+            m_ResourceCacheQueries = assetManager.GetResourceCacheQueries().Values.ToList();
             m_ResourceCacheQueries.Sort((a, b) => a.Path.CompareTo(b.Path));
         }
 

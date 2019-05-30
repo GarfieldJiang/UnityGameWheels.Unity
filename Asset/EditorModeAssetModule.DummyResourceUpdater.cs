@@ -26,6 +26,11 @@ namespace COL.UnityGameWheels.Unity.Asset
                 return ResourceGroupStatus.UpToDate;
             }
 
+            public void StopAllUpdatingResourceGroups()
+            {
+                // Empty.
+            }
+
             public ResourceGroupUpdateSummary GetResourceGroupUpdateSummary(int groupId)
             {
                 return new ResourceGroupUpdateSummary();
