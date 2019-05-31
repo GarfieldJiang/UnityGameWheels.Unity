@@ -44,8 +44,6 @@ namespace COL.UnityGameWheels.Unity
 
         public void ShutDown()
         {
-            Module.DownloadTaskPool.ShutDown();
-            Module.DownloadTaskPool = null;
             Module.ShutDown();
         }
 
