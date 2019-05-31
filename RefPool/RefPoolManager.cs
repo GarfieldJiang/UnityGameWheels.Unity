@@ -21,7 +21,7 @@ namespace COL.UnityGameWheels.Unity
         {
             get { return Module.PoolCount; }
         }
-        
+
         public bool ReadyToUse { get; private set; }
 
         public bool Contains<TObject>() where TObject : class, new()
@@ -79,6 +79,7 @@ namespace COL.UnityGameWheels.Unity
         {
             ReadyToUse = false;
             Module.ShutDown();
+            Module = null;
         }
 
         #region MonoBahviour
@@ -92,13 +93,6 @@ namespace COL.UnityGameWheels.Unity
         private void Update()
         {
             Module.Update(new TimeStruct(Time.deltaTime, Time.unscaledDeltaTime, Time.time, Time.unscaledTime));
-        }
-
-        protected override void OnDestroy()
-        {
-            Module.ShutDown();
-            Module = null;
-            base.OnDestroy();
         }
 
         #endregion MonoBahviour
