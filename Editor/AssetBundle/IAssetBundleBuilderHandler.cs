@@ -9,9 +9,9 @@ namespace COL.UnityGameWheels.Unity.Editor
 
         void OnPostBeforeBuild(AssetBundleBuild[] assetBundleBuilds);
 
-        void OnPreBuildPlatform(ResourcePlatform targetPlatform);
+        void OnPreBuildPlatform(ResourcePlatform targetPlatform, int internalResourceVersion);
 
-        void OnPostBuildPlatform(ResourcePlatform targetPlatform, string outputDirectory);
+        void OnPostBuildPlatform(ResourcePlatform targetPlatform, int internalResourceVersion, string outputDirectory);
 
         void OnBuildSuccess();
 

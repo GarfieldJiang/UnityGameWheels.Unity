@@ -22,25 +22,6 @@
                 GeneratorDirectoryName = generatorDirectoryName;
             }
 
-            private string CalculateDirectoryPath(string bundleVersion, ResourcePlatform targetPlatform, int internalResourceVersion)
-            {
-                var ret = Path.Combine(m_Builder.OutputDirectory, targetPlatform.ToString());
-
-                var bundleVersionSB = Core.StringBuilderCache.Acquire();
-                foreach (var ch in bundleVersion)
-                {
-                    bundleVersionSB.Append(Path.GetInvalidFileNameChars().Contains(ch) ? '_' : ch);
-                }
-
-                ret = Path.Combine(ret, Core.Utility.Text.Format("{0}.{1}",
-                    Core.StringBuilderCache.GetStringAndRelease(bundleVersionSB),
-                    internalResourceVersion));
-
-                ret = Path.Combine(ret, GeneratorDirectoryName);
-
-                return ret;
-            }
-
             protected abstract void GenerateIndex(string bundleVersion, ResourcePlatform targetPlatform, int internalResourceVersion,
                 IList<AssetBundleInfoForIndex> assetBundleInfosForIndex,
                 IDictionary<string, AssetInfo> assetInfos, string indexPath);
@@ -52,7 +33,7 @@
                 IList<AssetBundleInfoForIndex> assetBundleInfosForIndex,
                 IDictionary<string, AssetInfo> assetInfos)
             {
-                var directoryPath = CalculateDirectoryPath(bundleVersion, targetPlatform, internalResourceVersion);
+                var directoryPath = Path.Combine(m_Builder.GetOutputDirectory(targetPlatform, internalResourceVersion), GeneratorDirectoryName);
 
                 if (Directory.Exists(directoryPath))
                 {

@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace COL.UnityGameWheels.Unity.Editor
 {
@@ -19,6 +20,10 @@ namespace COL.UnityGameWheels.Unity.Editor
         private const string CurrentLogFileName = "current.log";
         private const string PreviousLogFileName = "prev.log";
         private const string AssetBundleSuffix = ".assetbundle";
+
+        public const string ClientFolderName = "Client";
+        public const string ClientFullFolderName = "ClientFull";
+        public const string ServerFolderName = "Server";
 
         private static readonly string InternalResourceVersionKeyFormat =
             typeof(AssetBundleBuilder).FullName + ".InternalResourceVersion_{0}_{1}";
@@ -49,21 +54,38 @@ namespace COL.UnityGameWheels.Unity.Editor
             }
         }
 
-        private string WorkingDirectory =>
+        public string WorkingDirectory =>
             string.IsNullOrEmpty(m_Config.WorkingDirectory)
                 ? DefaultWorkingDirectory
                 : m_Config.WorkingDirectory;
 
-        private string InternalDirectory => Path.Combine(WorkingDirectory, InternalDirectoryName);
+        public string InternalDirectory => Path.Combine(WorkingDirectory, InternalDirectoryName);
 
-        private string GetPlatformInternalDirectory(ResourcePlatform targetPlatform)
+        public string GetPlatformInternalDirectory(ResourcePlatform targetPlatform)
         {
             return Path.Combine(InternalDirectory, targetPlatform.ToString());
         }
 
-        private string OutputDirectory => Path.Combine(WorkingDirectory, OutputDirectoryName);
+        public string OutputDirectory => Path.Combine(WorkingDirectory, OutputDirectoryName);
 
-        private string LogDirectory => Path.Combine(WorkingDirectory, LogDirectoryName);
+        public string GetOutputDirectory(ResourcePlatform targetPlatform, int internalResourceVersion)
+        {
+            return Path.Combine(OutputDirectory, targetPlatform.ToString(),
+                GetResourceVersionFolderName(Application.version, internalResourceVersion));
+        }
+
+        public string GetResourceVersionFolderName(string bundleVersion, int internalResourceVersion)
+        {
+            var bundleVersionSB = Core.StringBuilderCache.Acquire();
+            foreach (var ch in bundleVersion)
+            {
+                bundleVersionSB.Append(Path.GetInvalidFileNameChars().Contains(ch) ? '_' : ch);
+            }
+
+            return $"{Core.StringBuilderCache.GetStringAndRelease(bundleVersionSB)}.{internalResourceVersion}";
+        }
+
+        public string LogDirectory => Path.Combine(WorkingDirectory, LogDirectoryName);
 
         private AssetBundleBuilderConfig m_Config = new AssetBundleBuilderConfig();
         private readonly XmlSerializer m_ConfigSerializer = new XmlSerializer(typeof(AssetBundleBuilderConfig));
@@ -211,7 +233,11 @@ namespace COL.UnityGameWheels.Unity.Editor
             IDictionary<string, AssetBundleInfo> assetBundleInfos,
             IDictionary<string, AssetInfo> assetInfos)
         {
-            CallHandlerOnPreBuildPlatform(handler, logger, targetPlatform);
+            int resourceVersion = GetInternalResourceVersion(PlayerSettings.bundleVersion, targetPlatform);
+            logger.Info("Internal resource version for bundle version '{0}' and target platform '{1}' is {2}.",
+                PlayerSettings.bundleVersion, targetPlatform, resourceVersion);
+            CallHandlerOnPreBuildPlatform(handler, logger, targetPlatform, resourceVersion);
+
             logger.Info("Start building for '{0}' target.", targetPlatform);
             logger.Info("Start building asset bundles.");
             var manifest = BuildAssetBundles(buildMaps, targetPlatform, buildOptions);
@@ -230,10 +256,6 @@ namespace COL.UnityGameWheels.Unity.Editor
                 logger.Info("Finish cleaning up internal directory.");
             }
 
-            int resourceVersion = GetInternalResourceVersion(PlayerSettings.bundleVersion, targetPlatform);
-            logger.Info("Internal resource version for bundle version '{0}' and target platform '{1}' is {2}.",
-                PlayerSettings.bundleVersion, targetPlatform, resourceVersion);
-
             logger.Info("Start generating information used to build the index file.");
             IList<AssetBundleInfoForIndex> assetBundleInfosForIndex =
                 GenerateAssetBundleInfosForIndex(assetBundleInfos, manifest, targetPlatform);
@@ -244,6 +266,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                 assetBundleInfosForIndex, assetInfos);
             logger.Info("Finish generating output.");
 
+            var currentResourceVersion = resourceVersion;
             if (autoIncVersion)
             {
                 SetInternalResourceVersion(PlayerSettings.bundleVersion, targetPlatform, resourceVersion + 1);
@@ -252,7 +275,7 @@ namespace COL.UnityGameWheels.Unity.Editor
 
             logger.Info("Finish building for '{0}' target.", targetPlatform);
 
-            CallHandlerOnPostBuildPlatform(handler, logger, targetPlatform, OutputDirectory);
+            CallHandlerOnPostBuildPlatform(handler, logger, targetPlatform, currentResourceVersion, OutputDirectory);
         }
 
         private IDictionary<string, AssetBundleInfo> BeforeBuild(IAssetBundleBuilderHandler handler, Logger logger,
@@ -346,9 +369,9 @@ namespace COL.UnityGameWheels.Unity.Editor
             return buildMaps.ToArray();
         }
 
-        private BuildTarget GetBuildTargetFromResourcePlatform(ResourcePlatform ResourcePlatform)
+        private static BuildTarget GetBuildTargetFromResourcePlatform(ResourcePlatform resourcePlatform)
         {
-            switch (ResourcePlatform)
+            switch (resourcePlatform)
             {
                 case ResourcePlatform.Android:
                     return BuildTarget.Android;
@@ -359,8 +382,29 @@ namespace COL.UnityGameWheels.Unity.Editor
                         Application.platform == RuntimePlatform.LinuxEditor ? BuildTarget.StandaloneLinuxUniversal :
                         BuildTarget.StandaloneOSX;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(ResourcePlatform),
-                        "Unsupported asset bundle platform " + ResourcePlatform);
+                    throw new ArgumentOutOfRangeException(nameof(resourcePlatform),
+                        $"Unsupported asset bundle platform '{resourcePlatform}'.");
+            }
+        }
+
+        public static ResourcePlatform GetResourcePlatformFromBuildTarget(BuildTarget buildTarget)
+        {
+            switch (buildTarget)
+            {
+                case BuildTarget.Android:
+                    return ResourcePlatform.Android;
+                case BuildTarget.iOS:
+                    return ResourcePlatform.iOS;
+                case BuildTarget.StandaloneLinux:
+                case BuildTarget.StandaloneLinux64:
+                case BuildTarget.StandaloneWindows:
+                case BuildTarget.StandaloneWindows64:
+                case BuildTarget.StandaloneLinuxUniversal:
+                case BuildTarget.StandaloneOSX:
+                    return ResourcePlatform.Standalone;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(buildTarget),
+                        $"Unsupported build target '{buildTarget}'.");
             }
         }
 
@@ -410,19 +454,19 @@ namespace COL.UnityGameWheels.Unity.Editor
         private void GenerateOutput(string bundleVersion, ResourcePlatform targetPlatform, int internalResourceVersion,
             IList<AssetBundleInfoForIndex> assetBundleInfosForIndex, IDictionary<string, AssetInfo> assetInfos)
         {
-            new OutputGeneratorInstaller(this, "Client", true).Run(
+            new OutputGeneratorInstaller(this, ClientFolderName, true).Run(
                 bundleVersion,
                 targetPlatform,
                 internalResourceVersion,
                 assetBundleInfosForIndex,
                 assetInfos);
-            new OutputGeneratorInstaller(this, "ClientFull", false).Run(
+            new OutputGeneratorInstaller(this, ClientFullFolderName, false).Run(
                 bundleVersion,
                 targetPlatform,
                 internalResourceVersion,
                 assetBundleInfosForIndex,
                 assetInfos);
-            new OutputGeneratorRemote(this, "Server").Run(
+            new OutputGeneratorRemote(this, ServerFolderName).Run(
                 bundleVersion,
                 targetPlatform,
                 internalResourceVersion,
@@ -515,12 +559,13 @@ namespace COL.UnityGameWheels.Unity.Editor
             }
         }
 
-        private void CallHandlerOnPreBuildPlatform(IAssetBundleBuilderHandler handler, Logger logger, ResourcePlatform resourcePlatform)
+        private void CallHandlerOnPreBuildPlatform(IAssetBundleBuilderHandler handler, Logger logger, ResourcePlatform resourcePlatform,
+            int internalResourceVersion)
         {
             try
             {
                 logger.Info("Trigger OnPreBuildPlatform in handler.");
-                handler.OnPreBuildPlatform(resourcePlatform);
+                handler.OnPreBuildPlatform(resourcePlatform, internalResourceVersion);
             }
             catch (Exception e)
             {
@@ -529,12 +574,12 @@ namespace COL.UnityGameWheels.Unity.Editor
         }
 
         private void CallHandlerOnPostBuildPlatform(IAssetBundleBuilderHandler handler, Logger logger, ResourcePlatform resourcePlatform,
-            string outputDirectory)
+            int internalResourceVersion, string outputDirectory)
         {
             try
             {
                 logger.Info("Trigger OnPostBuildPlatform in handler.");
-                handler.OnPostBuildPlatform(resourcePlatform, outputDirectory);
+                handler.OnPostBuildPlatform(resourcePlatform, internalResourceVersion, outputDirectory);
             }
             catch (Exception e)
             {

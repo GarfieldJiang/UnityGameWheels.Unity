@@ -15,11 +15,11 @@ namespace COL.UnityGameWheels.Unity.Editor
             {
             }
 
-            public void OnPreBuildPlatform(ResourcePlatform targetPlatform)
+            public void OnPreBuildPlatform(ResourcePlatform targetPlatform, int internalResourceVersion)
             {
             }
 
-            public void OnPostBuildPlatform(ResourcePlatform targetPlatform, string outputDirectory)
+            public void OnPostBuildPlatform(ResourcePlatform targetPlatform, int internalResourceVersion, string outputDirectory)
             {
             }
 
