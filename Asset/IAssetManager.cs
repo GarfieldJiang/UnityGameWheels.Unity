@@ -30,6 +30,8 @@
 
         void UnloadUnusedAssets();
 
+        bool EditorMode { get; }
+
         /// <summary>
         /// 
         /// </summary>
