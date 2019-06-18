@@ -29,7 +29,8 @@ namespace COL.UnityGameWheels.Unity.Editor
 
                 if (m_ScriptableObjectType != null)
                 {
-                    EditorGUILayout.HelpBox(Core.Utility.Text.Format("Class '{0}' is in assembly '{1}'.", m_ClassName, m_AssemblyName),
+                    EditorGUILayout.HelpBox(Core.Utility.Text.Format("Class '{0}' is in assembly '{1}'.", m_ScriptableObjectType.FullName,
+                            m_AssemblyName),
                         MessageType.Info);
                 }
                 else if (!string.IsNullOrEmpty(m_ClassName))
@@ -56,6 +57,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                     CreateScriptableObjectAsset();
                     //EditorUtility.FocusProjectWindow();
                 }
+
                 EditorGUILayout.Space();
             }
             EditorGUILayout.EndHorizontal();
@@ -66,7 +68,8 @@ namespace COL.UnityGameWheels.Unity.Editor
             m_ClassName = newClassName;
             m_ScriptableObjectType = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(a => a.GetTypes())
-                .FirstOrDefault(t => t.IsSubclassOf(typeof(ScriptableObject)) && !t.IsAbstract && t.Name == m_ClassName);
+                .FirstOrDefault(t => t.IsSubclassOf(typeof(ScriptableObject))
+                                     && !t.IsAbstract && (t.Name == m_ClassName || t.FullName == m_ClassName));
             if (m_ScriptableObjectType != null)
             {
                 m_AssemblyName = m_ScriptableObjectType.Assembly.GetName().Name;
@@ -79,7 +82,7 @@ namespace COL.UnityGameWheels.Unity.Editor
 
         private void CreateScriptableObjectAsset()
         {
-            var asset = CreateInstance(m_ScriptableObjectType.Name);
+            var asset = CreateInstance(m_ScriptableObjectType.FullName);
             string path = AssetDatabase.GetAssetPath(Selection.activeObject);
             if (string.IsNullOrEmpty(path))
             {
