@@ -510,8 +510,7 @@ namespace COL.UnityGameWheels.Unity.Editor
 
                 assetInfo.AssetBundlePath = assetBundlePath;
                 rawAssetBundleInfo.AssetGuids.Add(assetInfo.Guid);
-                var rawAssetInfo = m_Config.AssetInfos.FirstOrDefault(a => a.Guid == assetInfo.Guid);
-                if (rawAssetInfo == null)
+                if (!m_ConfigCache.AssetInfos.TryGetValue(assetInfo.Guid, out var rawAssetInfo))
                 {
                     rawAssetInfo = new AssetBundleOrganizerConfig.AssetInfo {Guid = assetInfo.Guid, AssetBundlePath = assetBundleInfo.Path};
                     m_ConfigCache.AssetInfos.Add(rawAssetInfo.Guid, rawAssetInfo);
