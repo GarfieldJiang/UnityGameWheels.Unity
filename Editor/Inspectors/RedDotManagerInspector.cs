@@ -15,22 +15,20 @@ namespace COL.UnityGameWheels.Unity.Editor
     [CustomEditor(typeof(RedDotManager))]
     public class RedDotManagerInspector : BaseManagerInspector
     {
-        public override bool AvailableWhenPlaying
-        {
-            get { return true; }
-        }
+        public override bool AvailableWhenPlaying => true;
 
-        public override bool AvailableWhenNotPlaying
-        {
-            get { return false; }
-        }
+        public override bool AvailableWhenNotPlaying => false;
 
         protected override void DrawContent()
         {
             var t = (RedDotManager)target;
-            DrawGetSection(t);
-            EditorGUILayout.Space();
-            DrawSetSection(t);
+            EditorGUI.BeginDisabledGroup(!t.IsSetUp);
+            {
+                DrawGetSection(t);
+                EditorGUILayout.Space();
+                DrawSetSection(t);
+            }
+            EditorGUI.EndDisabledGroup();
         }
 
         private string m_GetKeyInput = string.Empty;
@@ -41,8 +39,7 @@ namespace COL.UnityGameWheels.Unity.Editor
         private string m_SetWarningMessage = string.Empty;
         private bool m_DependencyFoldout = false;
         private bool m_ReverseDependencyFoldout = false;
-        private NodeQuery m_NodeQueryForGet;
-        private NodeQuery m_NodeQueryForSet;
+        private bool m_GetKeyExists;
 
         private void DrawGetSection(RedDotManager t)
         {
@@ -55,24 +52,24 @@ namespace COL.UnityGameWheels.Unity.Editor
                     if (GUILayout.Button("Query", GUILayout.MaxWidth(80)))
                     {
                         m_GetKey = m_GetKeyInput;
-                        m_NodeQueryForGet = ((RedDotModule)t.Module).GetNodeQuery(m_GetKey);
+                        m_GetKeyExists = !string.IsNullOrEmpty(m_GetKey) && t.HasNode(m_GetKey);
                     }
                 }
                 EditorGUILayout.EndHorizontal();
 
-                if (m_NodeQueryForGet == null)
+                if (!m_GetKeyExists)
                 {
                     EditorGUILayout.HelpBox($"Node not found for key [{m_GetKey}].", MessageType.Warning);
                 }
                 else
                 {
-                    EditorGUILayout.LabelField("Key:", m_NodeQueryForGet.Key);
-                    EditorGUILayout.LabelField("Value:", t.GetValue(m_NodeQueryForGet.Key).ToString());
-                    m_DependencyFoldout = EditorGUILayout.Foldout(m_DependencyFoldout, $"Depends on ({m_NodeQueryForGet.Dependencies.Length})");
+                    EditorGUILayout.LabelField("Key:", m_GetKey);
+                    EditorGUILayout.LabelField("Value:", t.GetValue(m_GetKey).ToString());
+                    m_DependencyFoldout = EditorGUILayout.Foldout(m_DependencyFoldout, $"Depends on ({t.GetDependencyCount(m_GetKey)})");
                     if (m_DependencyFoldout)
                     {
                         EditorGUI.indentLevel++;
-                        foreach (var dep in m_NodeQueryForGet.Dependencies)
+                        foreach (var dep in t.GetDependencies(m_GetKey))
                         {
                             EditorGUILayout.LabelField(dep);
                         }
@@ -81,11 +78,11 @@ namespace COL.UnityGameWheels.Unity.Editor
                     }
 
                     m_ReverseDependencyFoldout = EditorGUILayout.Foldout(m_ReverseDependencyFoldout,
-                        $"Those depending on this ({m_NodeQueryForGet.ReverseDependencies.Length})");
+                        $"Those depending on this ({t.GetReverseDependencyCount(m_GetKey)})");
                     if (m_ReverseDependencyFoldout)
                     {
                         EditorGUI.indentLevel++;
-                        foreach (var dep in m_NodeQueryForGet.ReverseDependencies)
+                        foreach (var dep in t.GetReverseDependencies(m_GetKey))
                         {
                             EditorGUILayout.LabelField(dep);
                         }
@@ -115,12 +112,12 @@ namespace COL.UnityGameWheels.Unity.Editor
                     if (GUILayout.Button("Set", GUILayout.MaxWidth(80)))
                     {
                         m_SetKey = m_SetKeyInput;
-                        m_NodeQueryForSet = ((RedDotModule)t.Module).GetNodeQuery(m_SetKey);
-                        if (m_NodeQueryForSet == null)
+                        var setKeyExists = !string.IsNullOrEmpty(m_SetKey) && t.HasNode(m_SetKey);
+                        if (!setKeyExists)
                         {
                             m_SetWarningMessage = $"Node not found for key [{m_SetKey}].";
                         }
-                        else if (!m_NodeQueryForSet.IsLeaf)
+                        else if (t.GetNodeType(m_SetKey) != RedDotNodeType.Leaf)
                         {
                             m_SetWarningMessage = $"Key [{m_SetKey}] corresponds to a non-leaf node.";
                         }
