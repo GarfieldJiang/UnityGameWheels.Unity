@@ -43,6 +43,7 @@ namespace COL.UnityGameWheels.Unity.Editor
 
         private void DrawGetSection(RedDotManager t)
         {
+            var module = (RedDotModule)t.Module;
             EditorGUILayout.BeginVertical();
             {
                 EditorGUILayout.LabelField("Query a key", EditorStyles.boldLabel);
@@ -52,7 +53,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                     if (GUILayout.Button("Query", GUILayout.MaxWidth(80)))
                     {
                         m_GetKey = m_GetKeyInput;
-                        m_GetKeyExists = !string.IsNullOrEmpty(m_GetKey) && t.HasNode(m_GetKey);
+                        m_GetKeyExists = !string.IsNullOrEmpty(m_GetKey) && module.HasNode(m_GetKey);
                     }
                 }
                 EditorGUILayout.EndHorizontal();
@@ -65,11 +66,11 @@ namespace COL.UnityGameWheels.Unity.Editor
                 {
                     EditorGUILayout.LabelField("Key:", m_GetKey);
                     EditorGUILayout.LabelField("Value:", t.GetValue(m_GetKey).ToString());
-                    m_DependencyFoldout = EditorGUILayout.Foldout(m_DependencyFoldout, $"Depends on ({t.GetDependencyCount(m_GetKey)})");
+                    m_DependencyFoldout = EditorGUILayout.Foldout(m_DependencyFoldout, $"Depends on ({module.GetDependencyCount(m_GetKey)})");
                     if (m_DependencyFoldout)
                     {
                         EditorGUI.indentLevel++;
-                        foreach (var dep in t.GetDependencies(m_GetKey))
+                        foreach (var dep in module.GetDependencies(m_GetKey))
                         {
                             EditorGUILayout.LabelField(dep);
                         }
@@ -78,11 +79,11 @@ namespace COL.UnityGameWheels.Unity.Editor
                     }
 
                     m_ReverseDependencyFoldout = EditorGUILayout.Foldout(m_ReverseDependencyFoldout,
-                        $"Those depending on this ({t.GetReverseDependencyCount(m_GetKey)})");
+                        $"Those depending on this ({module.GetReverseDependencyCount(m_GetKey)})");
                     if (m_ReverseDependencyFoldout)
                     {
                         EditorGUI.indentLevel++;
-                        foreach (var dep in t.GetReverseDependencies(m_GetKey))
+                        foreach (var dep in module.GetReverseDependencies(m_GetKey))
                         {
                             EditorGUILayout.LabelField(dep);
                         }
@@ -96,6 +97,7 @@ namespace COL.UnityGameWheels.Unity.Editor
 
         private void DrawSetSection(RedDotManager t)
         {
+            var module = (RedDotModule)t.Module;
             EditorGUILayout.BeginVertical();
             {
                 EditorGUILayout.LabelField("Set a leaf's value", EditorStyles.boldLabel);
@@ -112,12 +114,12 @@ namespace COL.UnityGameWheels.Unity.Editor
                     if (GUILayout.Button("Set", GUILayout.MaxWidth(80)))
                     {
                         m_SetKey = m_SetKeyInput;
-                        var setKeyExists = !string.IsNullOrEmpty(m_SetKey) && t.HasNode(m_SetKey);
+                        var setKeyExists = !string.IsNullOrEmpty(m_SetKey) && module.HasNode(m_SetKey);
                         if (!setKeyExists)
                         {
                             m_SetWarningMessage = $"Node not found for key [{m_SetKey}].";
                         }
-                        else if (t.GetNodeType(m_SetKey) != RedDotNodeType.Leaf)
+                        else if (module.GetNodeType(m_SetKey) != RedDotNodeType.Leaf)
                         {
                             m_SetWarningMessage = $"Key [{m_SetKey}] corresponds to a non-leaf node.";
                         }

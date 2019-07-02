@@ -31,58 +31,6 @@ namespace COL.UnityGameWheels.Unity.RedDot
             Module.AddLeaf(key);
         }
 
-        public bool HasNode(string key)
-        {
-            return Module.HasNode(key);
-        }
-
-        public bool HasNode(string key, RedDotNodeType nodeType)
-        {
-            return Module.HasNode(key, nodeType);
-        }
-
-        public RedDotNodeType GetNodeType(string key)
-        {
-            return Module.GetNodeType(key);
-        }
-
-        public IEnumerable<string> GetNodeKeys(RedDotNodeType nodeType)
-        {
-            return Module.GetNodeKeys(nodeType);
-        }
-
-        public IEnumerable<string> GetNodeKeys()
-        {
-            return Module.GetNodeKeys();
-        }
-
-        public int NodeCount => Module.NodeCount;
-
-        public int GetNodeCount(RedDotNodeType nodeType)
-        {
-            return Module.GetNodeCount(nodeType);
-        }
-
-        public IEnumerable<string> GetDependencies(string key)
-        {
-            return Module.GetDependencies(key);
-        }
-
-        public int GetDependencyCount(string key)
-        {
-            return Module.GetDependencyCount(key);
-        }
-
-        public IEnumerable<string> GetReverseDependencies(string key)
-        {
-            return Module.GetReverseDependencies(key);
-        }
-
-        public int GetReverseDependencyCount(string key)
-        {
-            return Module.GetReverseDependencyCount(key);
-        }
-
         public void AddLeaves(IEnumerable<string> key)
         {
             Module.AddLeaves(key);
