@@ -9,7 +9,7 @@ namespace COL.UnityGameWheels.Unity
         {
             private DownloadTaskImpl m_Owner = null;
 
-            public DownloadHandler(DownloadTaskImpl owner)
+            public DownloadHandler(DownloadTaskImpl owner) : base(owner.m_InnerBuffer)
             {
                 m_Owner = owner;
             }
@@ -17,21 +17,17 @@ namespace COL.UnityGameWheels.Unity
             protected override bool ReceiveData(byte[] data, int dataLength)
             {
                 var ret = base.ReceiveData(data, dataLength);
-                if (m_Owner.m_Buffer == null)
+
+                var needBufferLength = m_Owner.m_OuterBufferOffset + dataLength;
+                if (m_Owner.m_OuterBuffer.Length < needBufferLength)
                 {
-                    return ret;
+                    var oldOuterBuffer = m_Owner.m_OuterBuffer;
+                    m_Owner.m_OuterBuffer = new byte[Mathf.NextPowerOfTwo(needBufferLength)];
+                    System.Buffer.BlockCopy(oldOuterBuffer, 0, m_Owner.m_OuterBuffer, 0, m_Owner.m_OuterBufferOffset);
                 }
 
-                var needBufferLength = m_Owner.m_BufferOffset + dataLength;
-                if (m_Owner.m_Buffer.Length < needBufferLength)
-                {
-                    var oldBuffer = m_Owner.m_Buffer;
-                    m_Owner.m_Buffer = new byte[Mathf.NextPowerOfTwo(needBufferLength)];
-                    System.Buffer.BlockCopy(oldBuffer, 0, m_Owner.m_Buffer, 0, m_Owner.m_BufferOffset);
-                }
-
-                System.Buffer.BlockCopy(data, 0, m_Owner.m_Buffer, m_Owner.m_BufferOffset, dataLength);
-                m_Owner.m_BufferOffset += dataLength;
+                System.Buffer.BlockCopy(data, 0, m_Owner.m_OuterBuffer, m_Owner.m_OuterBufferOffset, dataLength);
+                m_Owner.m_OuterBufferOffset += dataLength;
                 return ret;
             }
         }
