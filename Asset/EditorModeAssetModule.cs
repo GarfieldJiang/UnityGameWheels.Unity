@@ -3,7 +3,7 @@
 namespace COL.UnityGameWheels.Unity.Asset
 {
     using Core;
-    using COL.UnityGameWheels.Core.Asset;
+    using Core.Asset;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -167,6 +167,11 @@ namespace COL.UnityGameWheels.Unity.Asset
             }
 
             return ret;
+        }
+
+        public int GetAssetResourceGroupId(string assetPath)
+        {
+            return Constant.CommonResourceGroupId;
         }
 
         public bool IsLoadingAnyAsset => false;

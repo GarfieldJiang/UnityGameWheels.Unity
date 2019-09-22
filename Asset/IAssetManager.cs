@@ -24,6 +24,8 @@
 
         void UnloadAsset(IAssetAccessor assetAccessor);
 
+        int GetAssetResourceGroupId(string assetPath);
+
         bool IsLoadingAnyAsset { get; }
 
         void RequestUnloadUnusedAssetBundles();

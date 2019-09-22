@@ -253,6 +253,11 @@
             Module.UnloadAsset(assetAccessor);
         }
 
+        public int GetAssetResourceGroupId(string assetPath)
+        {
+            return Module.GetAssetResourceGroupId(assetPath);
+        }
+
         public bool IsLoadingAnyAsset => Module?.IsLoadingAnyAsset ?? false;
 
         public void RequestUnloadUnusedAssetBundles()

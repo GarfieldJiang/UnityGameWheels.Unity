@@ -189,7 +189,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                 throw new ArgumentException(Core.Utility.Text.Format("Cannot find asset bundle with path '{0}'.", assetBundlePath));
             }
 
-            if (assetBundleGroup < 0)
+            if (assetBundleGroup < Core.Asset.Constant.CommonResourceGroupId)
             {
                 throw new ArgumentOutOfRangeException("assetBundleGroup", "Must be non-negative.");
             }
@@ -249,7 +249,7 @@ namespace COL.UnityGameWheels.Unity.Editor
 
         public AssetBundleInfo CreateNewAssetBundle(string assetBundlePath, int assetBundleGroup, bool DontPack)
         {
-            if (assetBundleGroup < 0)
+            if (assetBundleGroup < Core.Asset.Constant.CommonResourceGroupId)
             {
                 throw new ArgumentOutOfRangeException("assetBundleGroup", "Must be non-negative.");
             }
@@ -653,7 +653,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                             Name = segment,
                             Path = path,
                             Parent = node,
-                            GroupId = 0,
+                            GroupId = Core.Asset.Constant.CommonResourceGroupId,
                             IsDirectory = i < segments.Length - 1,
                         });
                     }

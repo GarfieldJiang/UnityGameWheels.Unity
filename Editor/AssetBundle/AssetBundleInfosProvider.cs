@@ -72,8 +72,9 @@ namespace COL.UnityGameWheels.Unity.Editor
                 {
                     var dependencyAssetInfo = m_AssetInfos[guid];
                     var dependencyABGroup = m_AssetBundleInfos[dependencyAssetInfo.AssetBundlePath].GroupId;
-                    if ((abGroup == 0 && dependencyABGroup != 0) ||
-                        (abGroup != 0 && dependencyABGroup != abGroup && dependencyABGroup != 0))
+                    if (abGroup == Core.Asset.Constant.CommonResourceGroupId && dependencyABGroup != Core.Asset.Constant.CommonResourceGroupId ||
+                        abGroup != Core.Asset.Constant.CommonResourceGroupId && dependencyABGroup != abGroup &&
+                        dependencyABGroup != Core.Asset.Constant.CommonResourceGroupId)
                     {
                         m_IllegalGroupDependencies.Add(new KeyValuePair<AssetInfo, AssetInfo>(assetInfo, dependencyAssetInfo));
                     }
@@ -155,7 +156,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                 {
                     continue;
                 }
-                
+
                 if (File.Exists(assetPath))
                 {
                     if (m_AssetInfos.ContainsKey(assetGuid))
