@@ -7,6 +7,11 @@ namespace COL.UnityGameWheels.Unity.Editor
     {
         public string WorkingDirectory = string.Empty;
 
+        /// <summary>
+        /// Use this to override the internal directory where asset bundles are generated.
+        /// </summary>
+        public string OverriddenInternalDirectory = string.Empty;
+
         public BuildAssetBundleOptions BuildAssetBundleOptions;
 
         /// <summary>

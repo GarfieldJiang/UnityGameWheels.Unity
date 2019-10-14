@@ -59,7 +59,17 @@ namespace COL.UnityGameWheels.Unity.Editor
                 ? DefaultWorkingDirectory
                 : m_Config.WorkingDirectory;
 
-        public string InternalDirectory => Path.Combine(WorkingDirectory, InternalDirectoryName);
+        public string InternalDirectory
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(Config.OverriddenInternalDirectory))
+                {
+                    return Config.OverriddenInternalDirectory;
+                }
+                return Path.Combine(WorkingDirectory, InternalDirectoryName);
+            }
+        }
 
         public string GetPlatformInternalDirectory(ResourcePlatform targetPlatform)
         {

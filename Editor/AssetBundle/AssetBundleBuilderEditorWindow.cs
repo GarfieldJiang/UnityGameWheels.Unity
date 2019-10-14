@@ -18,10 +18,7 @@
 
         private AssetBundleBuilderConfig Config
         {
-            get
-            {
-                return m_AssetBundleBuilder == null ? null : m_AssetBundleBuilder.Config;
-            }
+            get { return m_AssetBundleBuilder == null ? null : m_AssetBundleBuilder.Config; }
         }
 
         private Vector2 m_ScrollPosition;
@@ -51,6 +48,7 @@
                 {
                     DrawConfigPath();
                     DrawWorkingDirectory();
+                    DrawOverriddenInternalDirectory();
                     DrawCleanUpWorkingDirectoryAfterBuild();
                     DrawBuildOptions();
                     DrawPlatformConfigs();
@@ -116,6 +114,24 @@
             }
 
             Config.WorkingDirectory = newWorkingDirectory;
+        }
+
+        private void DrawOverriddenInternalDirectory()
+        {
+            var newOverriddenInternalDirectory = EditorGUILayout.DelayedTextField("Overridden Internal Directory", Config.OverriddenInternalDirectory);
+
+            if (Config.OverriddenInternalDirectory == newOverriddenInternalDirectory)
+            {
+                return;
+            }
+
+            if (newOverriddenInternalDirectory.Any(ch => Path.GetInvalidPathChars().Contains(ch)))
+            {
+                EditorUtility.DisplayDialog(titleContent.text, "Illegal overridden internal directory.", "Okay");
+                return;
+            }
+
+            Config.OverriddenInternalDirectory = newOverriddenInternalDirectory;
         }
 
         private void DrawBuildOptions()
