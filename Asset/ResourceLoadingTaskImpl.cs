@@ -44,6 +44,8 @@
                 {
                     Debug.LogWarningFormat("Asset bundle create request not done for path '{0}'.", ResourcePath);
                 }
+
+                m_AssetBundleCreateRequest.completed -= OnAssetBundleCreateRequestComplete;
                 m_AssetBundleCreateRequest = null;
             }
 
