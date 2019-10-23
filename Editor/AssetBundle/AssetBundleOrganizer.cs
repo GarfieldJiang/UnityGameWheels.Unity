@@ -480,8 +480,7 @@ namespace COL.UnityGameWheels.Unity.Editor
 
             foreach (var assetInfo in assetInfos)
             {
-                var assetObj = AssetDatabase.LoadAssetAtPath<Object>(assetInfo.Path);
-                if (assetObj == null)
+                if (AssetDatabase.GetMainAssetTypeAtPath(assetInfo.Path) == null)
                 {
                     continue;
                 }
@@ -761,8 +760,8 @@ namespace COL.UnityGameWheels.Unity.Editor
                     continue;
                 }
 
-                var asset = AssetDatabase.LoadAssetAtPath<Object>(assetPath);
-                if (asset is MonoScript)
+                var mainAssetType = AssetDatabase.GetMainAssetTypeAtPath(assetPath);
+                if (mainAssetType == typeof(MonoScript))
                 {
                     continue;
                 }

@@ -39,7 +39,7 @@ namespace COL.UnityGameWheels.Unity.Editor
             {
                 get
                 {
-                    return string.IsNullOrEmpty(Path) || AssetDatabase.LoadAssetAtPath<Object>(Path) == null;
+                    return string.IsNullOrEmpty(Path) || AssetDatabase.GetMainAssetTypeAtPath(Path) == null;
                 }
             }
 
