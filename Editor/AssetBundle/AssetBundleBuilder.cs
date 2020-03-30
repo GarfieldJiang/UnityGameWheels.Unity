@@ -389,7 +389,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                     return BuildTarget.iOS;
                 case ResourcePlatform.Standalone:
                     return Application.platform == RuntimePlatform.WindowsEditor ? BuildTarget.StandaloneWindows64 :
-                        Application.platform == RuntimePlatform.LinuxEditor ? BuildTarget.StandaloneLinuxUniversal :
+                        Application.platform == RuntimePlatform.LinuxEditor ? BuildTarget.StandaloneLinux64 :
                         BuildTarget.StandaloneOSX;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(resourcePlatform),
@@ -405,11 +405,9 @@ namespace COL.UnityGameWheels.Unity.Editor
                     return ResourcePlatform.Android;
                 case BuildTarget.iOS:
                     return ResourcePlatform.iOS;
-                case BuildTarget.StandaloneLinux:
                 case BuildTarget.StandaloneLinux64:
                 case BuildTarget.StandaloneWindows:
                 case BuildTarget.StandaloneWindows64:
-                case BuildTarget.StandaloneLinuxUniversal:
                 case BuildTarget.StandaloneOSX:
                     return ResourcePlatform.Standalone;
                 default:

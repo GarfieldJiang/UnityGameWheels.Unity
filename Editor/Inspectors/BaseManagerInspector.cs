@@ -1,4 +1,8 @@
 ﻿using UnityEditor;
+#if UNITY_2019_1_OR_NEWER
+using UnityEngine.UIElements;
+
+#endif
 
 namespace COL.UnityGameWheels.Unity.Editor
 {
@@ -8,9 +12,18 @@ namespace COL.UnityGameWheels.Unity.Editor
 
         public abstract bool AvailableWhenNotPlaying { get; }
 
-        public virtual bool AvailableWhenCompiling { get { return false; } }
+        public virtual bool AvailableWhenCompiling
+        {
+            get { return false; }
+        }
 
+
+        
+#if UNITY_2019_1_OR_NEWER
+        private void ImGuiDraw()
+#else
         public override void OnInspectorGUI()
+#endif
         {
             if (!CheckAvailableOrDrawHelpBox())
             {
@@ -19,6 +32,15 @@ namespace COL.UnityGameWheels.Unity.Editor
 
             DrawContent();
         }
+
+#if UNITY_2019_1_OR_NEWER
+        public override VisualElement CreateInspectorGUI()
+        {
+            var ve = new VisualElement();
+            ve.Add(new IMGUIContainer(ImGuiDraw));
+            return ve;
+        }
+#endif
 
         private bool CheckAvailableOrDrawHelpBox()
         {
