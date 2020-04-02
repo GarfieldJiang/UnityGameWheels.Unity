@@ -176,9 +176,7 @@
             {
                 switch (EditorUserBuildSettings.activeBuildTarget)
                 {
-                    case BuildTarget.StandaloneLinux:
                     case BuildTarget.StandaloneLinux64:
-                    case BuildTarget.StandaloneLinuxUniversal:
                     case BuildTarget.StandaloneOSX:
                     case BuildTarget.StandaloneWindows:
                     case BuildTarget.StandaloneWindows64:
