@@ -103,9 +103,14 @@ namespace COL.UnityGameWheels.Unity.Editor
         protected override void DrawContent()
         {
             EditorGUI.BeginDisabledGroup(Application.isPlaying);
+            EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(serializedObject.FindProperty("m_DefaultCapacity"));
-            EditorGUI.EndDisabledGroup();
+            if (EditorGUI.EndChangeCheck())
+            {
+                serializedObject.ApplyModifiedProperties();
+            }
 
+            EditorGUI.EndDisabledGroup();
             if (!Application.isPlaying) return;
 
             EditorGUILayout.Space();
@@ -252,6 +257,7 @@ namespace COL.UnityGameWheels.Unity.Editor
             {
                 throw new NullReferenceException($"Oops, property info for '{propertyName}' not found.");
             }
+
             var xValue = (int)pi.GetValue(xStats);
             var yValue = (int)pi.GetValue(yStats);
             return ReverseSortingOrderComparisonFactor * xValue.CompareTo(yValue);
