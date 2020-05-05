@@ -19,6 +19,7 @@ namespace COL.UnityGameWheels.Unity.Ioc
         protected override void Awake()
         {
             base.Awake();
+            DontDestroyOnLoad(gameObject);
             if (Instance != null)
             {
                 throw new InvalidOperationException($"There is already an instance of '{nameof(UnityApp)}'.");

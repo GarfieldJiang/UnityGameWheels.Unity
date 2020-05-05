@@ -29,6 +29,7 @@ namespace COL.UnityGameWheels.Unity.Editor
         private readonly HashSet<Type> m_TriedToCreateInspectorTypes = new HashSet<Type>();
         private readonly Dictionary<Type, Type> m_TypeToInspectorTypeMap = new Dictionary<Type, Type>();
         private readonly HashSet<string> m_BindingDataFoldoutFlags = new HashSet<string>();
+        private Vector2 m_ScrollPosition = Vector2.zero;
 
         public static void Open()
         {
@@ -123,19 +124,23 @@ namespace COL.UnityGameWheels.Unity.Editor
             }
             else
             {
-                EditorGUILayout.BeginVertical();
+                m_ScrollPosition = EditorGUILayout.BeginScrollView(m_ScrollPosition);
                 {
-                    DrawContainerStatusSection(UnityApp.Instance);
-                    if (UnityApp.Instance.Container != null)
+                    EditorGUILayout.BeginVertical();
                     {
-                        DrawBindingDataSection(UnityApp.Instance);
-                        DrawSingletonSection(UnityApp.Instance);
-                        EditorGUILayout.Space();
-                        ret = DrawInspectorSection(UnityApp.Instance);
-                        drawInspectorSection = true;
+                        DrawContainerStatusSection(UnityApp.Instance);
+                        if (UnityApp.Instance.Container != null)
+                        {
+                            DrawBindingDataSection(UnityApp.Instance);
+                            DrawSingletonSection(UnityApp.Instance);
+                            EditorGUILayout.Space();
+                            ret = DrawInspectorSection(UnityApp.Instance);
+                            drawInspectorSection = true;
+                        }
                     }
+                    EditorGUILayout.EndVertical();
                 }
-                EditorGUILayout.EndVertical();
+                EditorGUILayout.EndScrollView();
             }
 
             return ret;

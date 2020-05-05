@@ -17,14 +17,7 @@ namespace COL.UnityGameWheels.Unity.Asset
             Guard.RequireNotNull<ArgumentNullException>(mb, $"Invalid '{mb}'.");
             IBindingData bindingData;
 #if UNITY_EDITOR
-            if (config.EditorMode)
-            {
-                bindingData = container.BindSingleton<IAssetService, EditorModeAssetService>();
-            }
-            else
-            {
-                bindingData = BindRealAssetService(container, config, mb);
-            }
+            bindingData = config.EditorMode ? container.BindSingleton<IAssetService, EditorModeAssetService>() : BindRealAssetService(container, config, mb);
 #else
             bindingData = BindRealAssetService(container, config, mb);
 #endif
