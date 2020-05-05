@@ -1,6 +1,6 @@
 ﻿namespace COL.UnityGameWheels.Unity
 {
-    public partial class LogCollectionManager
+    public partial class LogCollectionService
     {
         private enum CmdType
         {

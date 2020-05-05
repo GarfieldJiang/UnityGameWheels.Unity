@@ -1,4 +1,6 @@
-﻿namespace COL.UnityGameWheels.Unity
+﻿using System;
+
+namespace COL.UnityGameWheels.Unity
 {
     using Core;
     using UnityEngine;
@@ -42,7 +44,22 @@
                 throw new System.ArgumentException("Must be UnityEngine.Object", "context");
             }
 
-            Debug.unityLogger.Log(LogTypes[(int)logLevel], message, (Object)message);
+            Debug.unityLogger.Log(LogTypes[(int)logLevel], message, (Object)context);
+        }
+
+        public void WriteException(Exception exception)
+        {
+            Debug.unityLogger.LogException(exception);
+        }
+
+        public void WriteException(Exception exception, object context)
+        {
+            if (!(context is Object))
+            {
+                throw new System.ArgumentException("Must be UnityEngine.Object", "context");
+            }
+
+            Debug.unityLogger.LogException(exception, (Object)context);
         }
     }
 }

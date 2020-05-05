@@ -2,7 +2,7 @@
 
 namespace COL.UnityGameWheels.Unity
 {
-    internal class DownloadTaskImplFactory : ISimpleFactory<IDownloadTaskImpl>
+    public class DownloadTaskImplFactory : ISimpleFactory<IDownloadTaskImpl>
     {
         public IDownloadTaskImpl Get()
         {
