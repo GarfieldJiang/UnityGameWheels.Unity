@@ -4,8 +4,10 @@ namespace COL.UnityGameWheels.Unity.Asset
 {
     public class AssetServiceConfig : ScriptableObject
     {
+#pragma warning disable 414
         [SerializeField]
         private bool m_EditorMode = false;
+#pragma warning restore 414
 
         public bool EditorMode
         {
