@@ -40,8 +40,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                 needRefreshView = true;
             }
 
-            EditorGUILayout.LabelField("Asset and Asset Bundle states", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField("Any asset is being loaded: " + assetService.IsLoadingAnyAsset);
+            EditorGUILayout.LabelField("Any asset/bundle is being loaded: " + assetService.IsLoadingAnyAsset);
             DrawResources();
             DrawAssets();
             return needRefreshView;
@@ -51,9 +50,9 @@ namespace COL.UnityGameWheels.Unity.Editor
         {
             m_LastRefreshTime = Time.unscaledTime;
             m_AssetCacheQueries = assetService.GetAssetCacheQueries().Values.ToList();
-            m_AssetCacheQueries.Sort((a, b) => a.Path.CompareTo(b.Path));
+            m_AssetCacheQueries.Sort((a, b) => a.Path?.CompareTo(b.Path) ?? 0);
             m_ResourceCacheQueries = assetService.GetResourceCacheQueries().Values.ToList();
-            m_ResourceCacheQueries.Sort((a, b) => a.Path.CompareTo(b.Path));
+            m_ResourceCacheQueries.Sort((a, b) => a.Path?.CompareTo(b.Path) ?? 0);
         }
 
         private void DrawResources()
