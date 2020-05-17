@@ -1,4 +1,6 @@
-﻿namespace COL.UnityGameWheels.Unity
+﻿using System;
+
+namespace COL.UnityGameWheels.Unity
 {
     using Core;
     using System.Diagnostics;
@@ -177,6 +179,16 @@
         public static void FatalFormat(string format, params object[] args)
         {
             CoreLog.FatalFormat(format, args);
+        }
+
+        public static void Exception(Exception e)
+        {
+            CoreLog.Exception(e);
+        }
+
+        public static void Exception(Exception e, Object context)
+        {
+            CoreLog.Exception(e, context);
         }
     }
 }
