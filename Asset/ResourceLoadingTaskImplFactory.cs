@@ -3,11 +3,11 @@
     using Core;
     using Core.Asset;
 
-    public class AssetLoadingTaskImplFactory : ISimpleFactory<IAssetLoadingTaskImpl>
+    public class ResourceLoadingTaskImplFactory : ISimpleFactory<IResourceLoadingTaskImpl>
     {
-        public IAssetLoadingTaskImpl Get()
+        public IResourceLoadingTaskImpl Get()
         {
-            return new AssetLoadingTaskImpl();
+            return new ResourceLoadingTaskImpl();
         }
     }
 }
