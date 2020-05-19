@@ -12,23 +12,18 @@ namespace COL.UnityGameWheels.Unity.Editor
 {
     public partial class AssetBundleOrganizer
     {
+        /// <summary>
+        /// Asset bundle path segment regular expression.
+        /// </summary>
+        /// <remarks>Only lower case letters, digits and underscore are allowed.</remarks>
         public static readonly Regex AssetBundlePathSegmentRegex = new Regex(@"^[\w\d_]+$");
+
         private const string DefaultConfigPath = "Assets/AssetBundleOrganizerConfig.xml";
 
         private static string s_ConfigPath = null;
 
-        public static string ConfigPath
-        {
-            get
-            {
-                if (s_ConfigPath == null)
-                {
-                    s_ConfigPath = Utility.Config.Read<AssetBundleOrganizerConfigPathAttribute, string>() ?? DefaultConfigPath;
-                }
-
-                return s_ConfigPath;
-            }
-        }
+        public static string ConfigPath =>
+            s_ConfigPath ?? (s_ConfigPath = Utility.Config.Read<AssetBundleOrganizerConfigPathAttribute, string>() ?? DefaultConfigPath);
 
         private AssetBundleOrganizerConfig m_Config = new AssetBundleOrganizerConfig();
         private AssetBundleOrganizerConfigCache m_ConfigCache = null;
@@ -91,26 +86,31 @@ namespace COL.UnityGameWheels.Unity.Editor
             pairs.Sort(CompareRootAssetDirectories);
 
             int normalizedCount = 0;
-            for (int i = 0; i < pairs.Count; i++)
+            foreach (var pair in pairs)
             {
-                var assetPath = AssetDatabase.GUIDToAssetPath(pairs[i].DirectoryGuid);
-                if (pairs[i].DirectoryGuid == null || AssetDatabase.LoadAssetAtPath<Object>(assetPath) == null)
+                var assetPath = AssetDatabase.GUIDToAssetPath(pair.DirectoryGuid);
+                if (pair.DirectoryGuid == null || AssetDatabase.LoadAssetAtPath<Object>(assetPath) == null)
                 {
                     continue;
                 }
 
-                if (normalizedCount > 0 && pairs[i].DirectoryGuid == pairs[normalizedCount - 1].DirectoryGuid)
+                if (Utility.Path.IsEditor(assetPath))
                 {
-                    if (!string.IsNullOrEmpty(pairs[i].Filter.Trim()))
+                    continue;
+                }
+
+                if (normalizedCount > 0 && pair.DirectoryGuid == pairs[normalizedCount - 1].DirectoryGuid)
+                {
+                    if (!string.IsNullOrEmpty(pair.Filter.Trim()))
                     {
                         pairs[normalizedCount - 1].Filter =
-                            string.Join(" ", new[] {pairs[normalizedCount - 1].Filter, pairs[i].Filter}).Trim();
+                            string.Join(" ", pairs[normalizedCount - 1].Filter, pair.Filter).Trim();
                     }
                 }
                 else
                 {
-                    pairs[normalizedCount].DirectoryGuid = pairs[i].DirectoryGuid;
-                    pairs[normalizedCount].Filter = pairs[i].Filter.Trim();
+                    pairs[normalizedCount].DirectoryGuid = pair.DirectoryGuid;
+                    pairs[normalizedCount].Filter = pair.Filter.Trim();
                     normalizedCount++;
                 }
             }
@@ -182,7 +182,7 @@ namespace COL.UnityGameWheels.Unity.Editor
 
             if (assetBundleGroup < Core.Asset.Constant.CommonResourceGroupId)
             {
-                throw new ArgumentOutOfRangeException("assetBundleGroup", "Must be non-negative.");
+                throw new ArgumentOutOfRangeException(nameof(assetBundleGroup), "Must be non-negative.");
             }
 
             if (assetBundleInfo.GroupId == assetBundleGroup)
@@ -242,7 +242,7 @@ namespace COL.UnityGameWheels.Unity.Editor
         {
             if (assetBundleGroup < Core.Asset.Constant.CommonResourceGroupId)
             {
-                throw new ArgumentOutOfRangeException("assetBundleGroup", "Must be non-negative.");
+                throw new ArgumentOutOfRangeException(nameof(assetBundleGroup), "Must be non-negative.");
             }
 
             if (!AssetBundlePathIsAvailable(assetBundlePath))
@@ -339,16 +339,6 @@ namespace COL.UnityGameWheels.Unity.Editor
             return true;
         }
 
-        public static bool AssetBundleVariantIsValid(string assetBundleVariant)
-        {
-            if (assetBundleVariant == string.Empty)
-            {
-                return true;
-            }
-
-            return AssetBundlePathSegmentRegex.IsMatch(assetBundleVariant);
-        }
-
         public void UnassignAssetFromBundle(AssetInfoInBundle assetInfoInBundle, string assetBundlePath)
         {
             var assetBundleInfo = GetAssetBundleInfo(assetBundlePath);
@@ -363,8 +353,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                 throw new ArgumentException(Core.Utility.Text.Format("Asset bundle info not found at path '{0}'", assetBundlePath));
             }
 
-            AssetInfo assetInfo;
-            if (m_IncludedAssetGuidToInfoMap.TryGetValue(assetInfoInBundle.Guid, out assetInfo) && assetInfo != null)
+            if (m_IncludedAssetGuidToInfoMap.TryGetValue(assetInfoInBundle.Guid, out var assetInfo) && assetInfo != null)
             {
                 assetInfo.AssetBundlePath = null;
             }
@@ -398,7 +387,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                 return null;
             }
 
-            AssetBundleOrganizerConfig.AssetBundleInfo rawAncestorBundleInfo = m_ConfigCache.AssetBundleInfos[ancestorBundlePath];
+            var rawAncestorBundleInfo = m_ConfigCache.AssetBundleInfos[ancestorBundlePath];
             if (rawAncestorBundleInfo == null)
             {
                 throw new InvalidOperationException(
@@ -437,20 +426,20 @@ namespace COL.UnityGameWheels.Unity.Editor
                 throw new ArgumentException("Shouldn't be null or empty.", nameof(assetInfos));
             }
 
-            for (int i = 0; i < assetInfos.Count; i++)
+            foreach (var assetInfo in assetInfos)
             {
-                if (assetInfos[i] == null)
+                if (assetInfo == null)
                 {
                     throw new ArgumentException("Contains invalid or illegal AssetInfo.", nameof(assetInfos));
                 }
             }
 
-            for (int i = 0; i < assetInfos.Count; i++)
+            foreach (var assetInfo in assetInfos)
             {
-                UnassignAssetFromBundle(assetInfos[i]);
+                UnassignAssetFromBundle(assetInfo);
             }
 
-            AssetBundleInfo assetBundleInfo = GetAssetBundleInfo(assetBundlePath);
+            var assetBundleInfo = GetAssetBundleInfo(assetBundlePath);
 
             if (assetBundleInfo == null)
             {
@@ -547,9 +536,9 @@ namespace COL.UnityGameWheels.Unity.Editor
         {
             var segments = assetBundlePath.Split('/');
             var node = m_AssetBundleInfoTreeRoot;
-            for (int i = 0; i < segments.Length; i++)
+            foreach (var segment in segments)
             {
-                node = node.Children[segments[i]];
+                node = node.Children[segment];
                 if (node == null)
                 {
                     return null;
@@ -561,8 +550,7 @@ namespace COL.UnityGameWheels.Unity.Editor
 
         public AssetInfo GetAssetInfo(string assetGuid)
         {
-            AssetInfo ret;
-            m_IncludedAssetGuidToInfoMap.TryGetValue(assetGuid, out ret);
+            m_IncludedAssetGuidToInfoMap.TryGetValue(assetGuid, out var ret);
             return ret;
         }
 
@@ -715,6 +703,11 @@ namespace COL.UnityGameWheels.Unity.Editor
             }
 
             var rootDirAssetPath = AssetDatabase.GUIDToAssetPath(rootDir.DirectoryGuid);
+            if (string.IsNullOrEmpty(rootDirAssetPath) || Utility.Path.IsEditor(rootDirAssetPath))
+            {
+                return;
+            }
+
             var rootDirAssetObj = AssetDatabase.LoadAssetAtPath<Object>(rootDirAssetPath);
             if (rootDirAssetObj == null)
             {
@@ -741,6 +734,11 @@ namespace COL.UnityGameWheels.Unity.Editor
             {
                 var assetPath = AssetDatabase.GUIDToAssetPath(assetGuid);
                 if (AssetIsInSubRootDir(rootDir, root.Path, assetPath))
+                {
+                    continue;
+                }
+
+                if (string.IsNullOrEmpty(assetPath) || Utility.Path.IsEditor(assetPath))
                 {
                     continue;
                 }
