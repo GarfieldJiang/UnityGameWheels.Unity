@@ -1,13 +1,13 @@
 ﻿using System;
+using COL.UnityGameWheels.Core;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace COL.UnityGameWheels.Unity
 {
-    using Core;
-    using UnityEngine;
-
     public class LoggerImpl : ILoggerImpl
     {
-        private readonly static LogType[] LogTypes =
+        private static readonly LogType[] LogTypes =
         {
             LogType.Log,
             LogType.Log,
@@ -41,7 +41,7 @@ namespace COL.UnityGameWheels.Unity
 
             if (!(context is Object))
             {
-                throw new System.ArgumentException("Must be UnityEngine.Object", "context");
+                throw new System.ArgumentException("Must be UnityEngine.Object", nameof(context));
             }
 
             Debug.unityLogger.Log(LogTypes[(int)logLevel], message, (Object)context);
@@ -56,7 +56,7 @@ namespace COL.UnityGameWheels.Unity
         {
             if (!(context is Object))
             {
-                throw new System.ArgumentException("Must be UnityEngine.Object", "context");
+                throw new System.ArgumentException("Must be UnityEngine.Object", nameof(context));
             }
 
             Debug.unityLogger.LogException(exception, (Object)context);

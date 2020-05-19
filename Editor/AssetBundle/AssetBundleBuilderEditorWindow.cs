@@ -1,12 +1,13 @@
-﻿namespace COL.UnityGameWheels.Unity.Editor
-{
-    using Asset;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using UnityEditor;
-    using UnityEngine;
+﻿using COL.UnityGameWheels.Unity.Asset;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using UnityEditor;
+using UnityEngine;
 
+
+namespace COL.UnityGameWheels.Unity.Editor
+{
     public class AssetBundleBuilderEditorWindow : EditorWindow
     {
         private const int TargetPlatformColumnWidth = 160;
@@ -16,16 +17,13 @@
 
         private AssetBundleBuilder m_AssetBundleBuilder = null;
 
-        private AssetBundleBuilderConfig Config
-        {
-            get { return m_AssetBundleBuilder == null ? null : m_AssetBundleBuilder.Config; }
-        }
+        private AssetBundleBuilderConfig Config => m_AssetBundleBuilder?.Config;
 
         private Vector2 m_ScrollPosition;
 
-        private Dictionary<ResourcePlatform, int> m_InternalResourceVersions = new Dictionary<ResourcePlatform, int>();
+        private readonly Dictionary<ResourcePlatform, int> m_InternalResourceVersions = new Dictionary<ResourcePlatform, int>();
 
-        public static void Open(AssetBundleBuilder assetBundleBuilder = null)
+        public static void Open()
         {
             var window = GetWindow<AssetBundleBuilderEditorWindow>(true, "Asset Bundle Builder");
             window.minSize = new Vector2(240f, 360f);

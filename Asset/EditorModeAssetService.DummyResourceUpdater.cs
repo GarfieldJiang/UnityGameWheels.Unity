@@ -9,7 +9,7 @@ namespace COL.UnityGameWheels.Unity.Asset
     {
         private class DummyResourceUpdater : IResourceUpdater
         {
-            public bool IsReady { get { return true; } }
+            public bool IsReady => true;
 
             public int[] GetAvailableResourceGroupIds()
             {
@@ -38,10 +38,7 @@ namespace COL.UnityGameWheels.Unity.Asset
 
             public void StartUpdatingResourceGroup(int groupId, ResourceGroupUpdateCallbackSet callbackSet, object context)
             {
-                if (callbackSet.OnAllSuccess != null)
-                {
-                    callbackSet.OnAllSuccess(context);
-                }
+                callbackSet.OnAllSuccess?.Invoke(context);
             }
 
             public bool StopUpdatingResourceGroup(int groupId)

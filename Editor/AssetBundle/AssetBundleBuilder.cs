@@ -1,16 +1,15 @@
 ﻿using System.Linq;
 using System.Text.RegularExpressions;
+using COL.UnityGameWheels.Unity.Asset;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Xml.Serialization;
+using UnityEditor;
+using UnityEngine;
 
 namespace COL.UnityGameWheels.Unity.Editor
 {
-    using Asset;
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Xml.Serialization;
-    using UnityEditor;
-    using UnityEngine;
-
     public partial class AssetBundleBuilder
     {
         private const string DefaultConfigPath = "Assets/AssetBundleBuilderConfig.xml";
@@ -67,6 +66,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                 {
                     return Config.OverriddenInternalDirectory;
                 }
+
                 return Path.Combine(WorkingDirectory, InternalDirectoryName);
             }
         }
@@ -127,6 +127,7 @@ namespace COL.UnityGameWheels.Unity.Editor
 
             if (m_Config.PlatformConfigs.Count <= 0)
             {
+                // TODO: Use reflection on the enum ResourcePlatform to add all platforms.
                 m_Config.PlatformConfigs.Add(new AssetBundleBuilderConfig.PlatformConfig
                     {TargetPlatform = ResourcePlatform.Standalone});
                 m_Config.PlatformConfigs.Add(new AssetBundleBuilderConfig.PlatformConfig

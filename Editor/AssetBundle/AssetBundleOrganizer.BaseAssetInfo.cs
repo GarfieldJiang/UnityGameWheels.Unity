@@ -11,23 +11,13 @@ namespace COL.UnityGameWheels.Unity.Editor
 
             public string Guid
             {
-                get
-                {
-                    return m_Guid;
-                }
+                get => m_Guid;
 
                 set
                 {
                     m_Guid = value;
                     Path = AssetDatabase.GUIDToAssetPath(m_Guid);
-                    if (!string.IsNullOrEmpty(Path))
-                    {
-                        Name = System.IO.Path.GetFileName(Path);
-                    }
-                    else
-                    {
-                        Name = string.Empty;
-                    }
+                    Name = !string.IsNullOrEmpty(Path) ? System.IO.Path.GetFileName(Path) : string.Empty;
                 }
             }
 
@@ -35,29 +25,11 @@ namespace COL.UnityGameWheels.Unity.Editor
 
             public string Name { get; private set; }
 
-            public bool IsNullOrMissing
-            {
-                get
-                {
-                    return string.IsNullOrEmpty(Path) || AssetDatabase.GetMainAssetTypeAtPath(Path) == null;
-                }
-            }
+            public bool IsNullOrMissing => string.IsNullOrEmpty(Path) || AssetDatabase.GetMainAssetTypeAtPath(Path) == null;
 
-            public bool IsFile
-            {
-                get
-                {
-                    return !IsNullOrMissing && !AssetDatabase.IsValidFolder(Path);
-                }
-            }
+            public bool IsFile => !IsNullOrMissing && !AssetDatabase.IsValidFolder(Path);
 
-            public bool IsDirectory
-            {
-                get
-                {
-                    return !IsNullOrMissing && AssetDatabase.IsValidFolder(Path);
-                }
-            }
+            public bool IsDirectory => !IsNullOrMissing && AssetDatabase.IsValidFolder(Path);
         }
     }
 }

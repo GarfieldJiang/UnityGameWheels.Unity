@@ -6,17 +6,11 @@ namespace COL.UnityGameWheels.Unity.Editor
     {
         public abstract class PathTreeNode<T>
         {
-            public string Name = string.Empty;
-            public T Parent = default(T);
-            public SortedDictionary<string, T> Children = new SortedDictionary<string, T>();
+            public string Name { get; internal set; } = string.Empty;
+            public T Parent { get; internal set; } = default(T);
+            public SortedDictionary<string, T> Children { get; internal set; } = new SortedDictionary<string, T>();
 
-            public bool IsRoot
-            {
-                get
-                {
-                    return Parent == null;
-                }
-            }
+            public bool IsRoot => Parent == null;
         }
     }
 }

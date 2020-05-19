@@ -36,7 +36,7 @@
 
             public static void OpenFolder(string folder)
             {
-                folder = string.Format("\"{0}\"", folder);
+                folder = $"\"{folder}\"";
                 switch (Application.platform)
                 {
                     case RuntimePlatform.WindowsEditor:
@@ -47,7 +47,7 @@
                         break;
                     default:
                         throw new NotSupportedException(
-                            string.Format("Opening folder on '{0}' platform is not supported.", Application.platform.ToString()));
+                            $"Opening folder on '{Application.platform.ToString()}' platform is not supported.");
                 }
             }
         }

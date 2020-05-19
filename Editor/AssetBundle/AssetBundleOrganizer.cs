@@ -33,27 +33,18 @@ namespace COL.UnityGameWheels.Unity.Editor
         private AssetBundleOrganizerConfig m_Config = new AssetBundleOrganizerConfig();
         private AssetBundleOrganizerConfigCache m_ConfigCache = null;
 
-        public AssetBundleOrganizerConfigCache ConfigCache
-        {
-            get { return m_ConfigCache; }
-        }
+        public AssetBundleOrganizerConfigCache ConfigCache => m_ConfigCache;
 
         private readonly List<AssetInfo> m_AssetInfoForestRoots = new List<AssetInfo>();
 
-        public IList<AssetInfo> AssetInfoForestRoots
-        {
-            get { return m_AssetInfoForestRoots.AsReadOnly(); }
-        }
+        public IList<AssetInfo> AssetInfoForestRoots => m_AssetInfoForestRoots.AsReadOnly();
 
         private readonly AssetBundleInfo m_AssetBundleInfoTreeRoot = new AssetBundleInfo {IsDirectory = true, Parent = null, Path = string.Empty};
 
-        public AssetBundleInfo AssetBundleInfoTreeRoot
-        {
-            get { return m_AssetBundleInfoTreeRoot; }
-        }
+        public AssetBundleInfo AssetBundleInfoTreeRoot => m_AssetBundleInfoTreeRoot;
 
         private readonly Dictionary<string, AssetInfo> m_IncludedAssetGuidToInfoMap = new Dictionary<string, AssetInfo>();
-        public XmlSerializer m_ConfigSerializer = new XmlSerializer(typeof(AssetBundleOrganizerConfig));
+        private readonly XmlSerializer m_ConfigSerializer = new XmlSerializer(typeof(AssetBundleOrganizerConfig));
 
         public AssetBundleOrganizer()
         {
@@ -422,7 +413,7 @@ namespace COL.UnityGameWheels.Unity.Editor
         {
             if (assetBundleInfo == null)
             {
-                throw new ArgumentNullException("assetBundleInfo");
+                throw new ArgumentNullException(nameof(assetBundleInfo));
             }
 
             if (assetBundleInfo.IsDirectory)
@@ -443,14 +434,14 @@ namespace COL.UnityGameWheels.Unity.Editor
         {
             if (assetInfos == null || assetInfos.Count <= 0)
             {
-                throw new ArgumentException("Shouldn't be null or empty.", "assetInfos");
+                throw new ArgumentException("Shouldn't be null or empty.", nameof(assetInfos));
             }
 
             for (int i = 0; i < assetInfos.Count; i++)
             {
                 if (assetInfos[i] == null)
                 {
-                    throw new ArgumentException("Contains invalid or illegal AssetInfo.", "assetInfos");
+                    throw new ArgumentException("Contains invalid or illegal AssetInfo.", nameof(assetInfos));
                 }
             }
 
@@ -463,12 +454,12 @@ namespace COL.UnityGameWheels.Unity.Editor
 
             if (assetBundleInfo == null)
             {
-                throw new ArgumentNullException("assetBundlePath", "Shouldn't be null.");
+                throw new ArgumentNullException(nameof(assetBundlePath), "Shouldn't be null.");
             }
 
             if (assetBundleInfo.IsDirectory)
             {
-                throw new ArgumentException("Shouldn't be a directory.", "assetBundlePath");
+                throw new ArgumentException("Shouldn't be a directory.", nameof(assetBundlePath));
             }
 
             var rawAssetBundleInfo = m_ConfigCache.AssetBundleInfos[assetBundleInfo.Path];
@@ -666,11 +657,10 @@ namespace COL.UnityGameWheels.Unity.Editor
         {
             if (assetInfo == null)
             {
-                throw new ArgumentNullException("assetInfo");
+                throw new ArgumentNullException(nameof(assetInfo));
             }
 
-            AssetBundleOrganizerConfig.AssetInfo rawAssetInfo;
-            if (!m_ConfigCache.AssetInfos.TryGetValue(assetInfo.Guid, out rawAssetInfo))
+            if (!m_ConfigCache.AssetInfos.TryGetValue(assetInfo.Guid, out var rawAssetInfo))
             {
                 return;
             }
@@ -802,8 +792,7 @@ namespace COL.UnityGameWheels.Unity.Editor
 
         private string GetAssetBundlePath(string assetPath)
         {
-            AssetBundleOrganizerConfig.AssetInfo rawAssetInfo;
-            m_ConfigCache.AssetInfos.TryGetValue(AssetDatabase.AssetPathToGUID(assetPath), out rawAssetInfo);
+            m_ConfigCache.AssetInfos.TryGetValue(AssetDatabase.AssetPathToGUID(assetPath), out var rawAssetInfo);
             return rawAssetInfo == null ? string.Empty : rawAssetInfo.AssetBundlePath;
         }
 

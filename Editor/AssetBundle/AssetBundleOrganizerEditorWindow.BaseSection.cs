@@ -13,13 +13,7 @@
 
             public abstract void Draw();
 
-            protected AssetBundleOrganizer Organizer
-            {
-                get
-                {
-                    return m_EditorWindow.m_AssetBundleOrganizer;
-                }
-            }
+            protected AssetBundleOrganizer Organizer => m_EditorWindow.m_AssetBundleOrganizer;
         }
     }
 }

@@ -10,14 +10,6 @@ namespace COL.UnityGameWheels.Unity.Editor
 
         public bool DontPack = false;
 
-        private List<string> m_AssetGuids = new List<string>();
-
-        public List<string> AssetGuids
-        {
-            get
-            {
-                return m_AssetGuids;
-            }
-        }
+        public List<string> AssetGuids { get; } = new List<string>();
     }
 }

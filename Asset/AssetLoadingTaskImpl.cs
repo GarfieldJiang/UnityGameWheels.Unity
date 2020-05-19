@@ -9,41 +9,17 @@
     {
         public object ResourceObject { get; set; }
 
-        private AssetBundle AssetBundle
-        {
-            get
-            {
-                return (AssetBundle)ResourceObject;
-            }
-        }
+        private AssetBundle AssetBundle => (AssetBundle)ResourceObject;
 
         public string AssetPath { get; set; }
 
         private object m_AssetObject = null;
 
-        public object AssetObject
-        {
-            get
-            {
-                return m_AssetObject;
-            }
-        }
+        public object AssetObject => m_AssetObject;
 
-        public bool IsDone
-        {
-            get
-            {
-                return m_AssetBundleRequest == null ? false : m_AssetBundleRequest.isDone;
-            }
-        }
+        public bool IsDone => m_AssetBundleRequest != null && m_AssetBundleRequest.isDone;
 
-        public float Progress
-        {
-            get
-            {
-                return m_AssetBundleRequest == null ? 0f : m_AssetBundleRequest.progress;
-            }
-        }
+        public float Progress => m_AssetBundleRequest?.progress ?? 0f;
 
         public string ErrorMessage { get; private set; }
 
@@ -61,8 +37,8 @@
                 {
                     Debug.LogWarningFormat("Asset bundle request not done for asset '{0}'.", AssetPath);
                 }
-                m_AssetBundleRequest = null;
 
+                m_AssetBundleRequest = null;
             }
 
             AssetPath = string.Empty;
@@ -88,7 +64,6 @@
             var assetName = AssetPath; //System.IO.Path.GetFileNameWithoutExtension(AssetPath);
             m_AssetBundleRequest = AssetBundle.LoadAssetAsync(assetName);
             m_AssetBundleRequest.completed += OnAssetBundleRequestComplete;
-
         }
 
         private void OnAssetBundleRequestComplete(AsyncOperation asyncOperation)

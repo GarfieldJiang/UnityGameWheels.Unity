@@ -29,7 +29,7 @@ namespace COL.UnityGameWheels.Unity
                     throw new InvalidOperationException("Already set.");
                 }
 
-                m_LogCallbackRegistrar = value ?? throw new ArgumentNullException("value");
+                m_LogCallbackRegistrar = value ?? throw new ArgumentNullException(nameof(value));
             }
         }
 

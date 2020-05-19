@@ -4,8 +4,8 @@
     {
         public class RootDirectoryInfo
         {
-            public string DirectoryGuid = string.Empty;
-            public string Filter = string.Empty;
+            public string DirectoryGuid { get; set; } = string.Empty;
+            public string Filter { get; set; } = string.Empty;
         }
     }
 }

@@ -8,7 +8,7 @@ namespace COL.UnityGameWheels.Unity
     internal partial class DownloadTaskImpl : IDownloadTaskImpl
     {
         private UnityWebRequestAsyncOperation m_WebRequestAsyncOperation = null;
-        private byte[] m_InnerBuffer = new byte[512 * 1024];
+        private readonly byte[] m_InnerBuffer = new byte[512 * 1024];
         private byte[] m_OuterBuffer = new byte[512 * 1024];
         private int m_OuterBufferOffset = 0;
 

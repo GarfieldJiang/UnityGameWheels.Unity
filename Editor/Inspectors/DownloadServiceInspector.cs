@@ -52,7 +52,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                 .GetValue(downloadService);
             var getEnumeratorMethod = waitingTasks.GetType().GetMethod("GetEnumerator", BindingFlags.Instance | BindingFlags.Public);
 
-            EditorGUILayout.BeginVertical("box");
+            EditorGUILayout.BeginVertical();
             {
                 bool any = false;
                 for (var enumerator = getEnumeratorMethod.Invoke(waitingTasks, null) as IEnumerator; enumerator.MoveNext(); /* Empty */)
@@ -92,7 +92,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                 .GetField("m_OngoingDownloadTasks", BindingFlags.Instance | BindingFlags.NonPublic)
                 .GetValue(downloadService) as Dictionary<int, IDownloadTask>;
 
-            EditorGUILayout.BeginVertical("box");
+            EditorGUILayout.BeginVertical();
             {
                 bool any = false;
                 for (var enumerator = ongoingTasks.GetEnumerator(); enumerator.MoveNext(); /* Empty */)
@@ -177,6 +177,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                 return;
             }
 
+            EditorGUI.indentLevel++;
             var downloadTaskInfo = downloadTask.Info.Value;
             EditorGUILayout.BeginVertical();
             {
@@ -209,10 +210,12 @@ namespace COL.UnityGameWheels.Unity.Editor
                 EditorGUILayout.LabelField(StringBuilderCache.GetStringAndRelease(sb), EditorStyles.wordWrappedLabel);
             }
             EditorGUILayout.EndVertical();
+            EditorGUI.indentLevel--;
         }
 
         private static void DrawDownloadTaskInfo(DownloadTaskInfo downloadTaskInfo)
         {
+            EditorGUI.indentLevel++;
             EditorGUILayout.BeginVertical();
             {
                 var sb = StringBuilderCache.Acquire();
@@ -231,6 +234,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                 EditorGUILayout.LabelField(StringBuilderCache.GetStringAndRelease(sb), EditorStyles.wordWrappedLabel);
             }
             EditorGUILayout.EndVertical();
+            EditorGUI.indentLevel--;
         }
     }
 }

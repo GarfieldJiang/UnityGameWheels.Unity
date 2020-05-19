@@ -6,7 +6,6 @@ using UnityEditor;
 using UnityEngine;
 #if UNITY_2019_1_OR_NEWER
 using UnityEngine.UIElements;
-
 #endif
 
 namespace COL.UnityGameWheels.Unity.Editor

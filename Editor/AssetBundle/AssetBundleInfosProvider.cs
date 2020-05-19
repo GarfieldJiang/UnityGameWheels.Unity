@@ -9,47 +9,30 @@ namespace COL.UnityGameWheels.Unity.Editor
 {
     public class AssetBundleInfosProvider
     {
-        private AssetBundleOrganizer m_Organizer = null;
+        private readonly AssetBundleOrganizer m_Organizer = null;
 
-        private Dictionary<string, AssetBundleInfo> m_AssetBundleInfos =
+        private readonly Dictionary<string, AssetBundleInfo> m_AssetBundleInfos =
             new Dictionary<string, AssetBundleInfo>();
 
-        public IDictionary<string, AssetBundleInfo> AssetBundleInfos
-        {
-            get { return m_AssetBundleInfos; }
-        }
+        public IDictionary<string, AssetBundleInfo> AssetBundleInfos => m_AssetBundleInfos;
 
-        private List<KeyValuePair<AssetInfo, AssetInfo>> m_IllegalGroupDependencies =
+        private readonly List<KeyValuePair<AssetInfo, AssetInfo>> m_IllegalGroupDependencies =
             new List<KeyValuePair<AssetInfo, AssetInfo>>();
 
-        public IList<KeyValuePair<AssetInfo, AssetInfo>> IllegalGroupDependencies
-        {
-            get { return m_IllegalGroupDependencies.AsReadOnly(); }
-        }
+        public IList<KeyValuePair<AssetInfo, AssetInfo>> IllegalGroupDependencies => m_IllegalGroupDependencies.AsReadOnly();
 
-        private List<IList<AssetInfo>> m_CycleAssetDependencies = new List<IList<AssetInfo>>();
+        private readonly List<IList<AssetInfo>> m_CycleAssetDependencies = new List<IList<AssetInfo>>();
 
-        public IList<IList<AssetInfo>> CycleAssetDependencies
-        {
-            get { return m_CycleAssetDependencies; }
-        }
+        public IList<IList<AssetInfo>> CycleAssetDependencies => m_CycleAssetDependencies;
 
-        private Dictionary<string, AssetInfo> m_AssetInfos = new Dictionary<string, AssetInfo>();
+        private readonly Dictionary<string, AssetInfo> m_AssetInfos = new Dictionary<string, AssetInfo>();
 
-        public IDictionary<string, AssetInfo> AssetInfos
-        {
-            get { return m_AssetInfos; }
-        }
+        public IDictionary<string, AssetInfo> AssetInfos => m_AssetInfos;
 
 
         public AssetBundleInfosProvider(AssetBundleOrganizer organizer)
         {
-            if (organizer == null)
-            {
-                throw new ArgumentNullException("organizer");
-            }
-
-            m_Organizer = organizer;
+            m_Organizer = organizer ?? throw new ArgumentNullException(nameof(organizer));
         }
 
         public void PopulateData()
@@ -101,10 +84,10 @@ namespace COL.UnityGameWheels.Unity.Editor
             foreach (var assetInfo in m_AssetInfos.Values)
             {
                 var rawDeps = AssetDatabase.GetDependencies(AssetDatabase.GUIDToAssetPath(assetInfo.Guid), false)
-                    .Select(path => AssetDatabase.AssetPathToGUID(path))
+                    .Select(AssetDatabase.AssetPathToGUID)
                     .Where(guid => guid != assetInfo.Guid);
                 var guidQueue = new Queue<string>(rawDeps);
-                var guidSet = new HashSet<string>(rawDeps);
+                var guidSet = new HashSet<string>(guidQueue);
 
                 while (guidQueue.Count > 0)
                 {
@@ -117,7 +100,7 @@ namespace COL.UnityGameWheels.Unity.Editor
 
                     var deps = AssetDatabase.GetDependencies(AssetDatabase.GUIDToAssetPath(guid), false)
                         .Where(path => !path.ToLower().EndsWith(".unity"))
-                        .Select(path => AssetDatabase.AssetPathToGUID(path));
+                        .Select(AssetDatabase.AssetPathToGUID);
                     foreach (var dep in deps)
                     {
                         if (guidSet.Contains(dep))
@@ -161,9 +144,8 @@ namespace COL.UnityGameWheels.Unity.Editor
                 {
                     if (m_AssetInfos.ContainsKey(assetGuid))
                     {
-                        throw new InvalidOperationException(string.Format(
-                            "Asset '{0}' already assigned to asset bundle '{1}'. Now trying to add it into '{2}'.",
-                            assetPath, m_AssetInfos[assetGuid].AssetBundlePath, ret.Path));
+                        throw new InvalidOperationException(
+                            $"Asset '{assetPath}' already assigned to asset bundle '{m_AssetInfos[assetGuid].AssetBundlePath}'. Now trying to add it into '{ret.Path}'.");
                     }
 
                     ret.AssetGuids.Add(assetGuid);

@@ -15,21 +15,9 @@
 
         private AssetBundleCreateRequest m_AssetBundleCreateRequest = null;
 
-        public bool IsDone
-        {
-            get
-            {
-                return m_AssetBundleCreateRequest == null ? false : m_AssetBundleCreateRequest.isDone;
-            }
-        }
+        public bool IsDone => m_AssetBundleCreateRequest?.isDone ?? false;
 
-        public float Progress
-        {
-            get
-            {
-                return m_AssetBundleCreateRequest == null ? 0f : m_AssetBundleCreateRequest.progress;
-            }
-        }
+        public float Progress => m_AssetBundleCreateRequest?.progress ?? 0f;
 
         public string ErrorMessage { get; private set; }
 
@@ -65,7 +53,8 @@
                 throw new InvalidOperationException("Already started");
             }
 
-            m_AssetBundleCreateRequest = AssetBundle.LoadFromFileAsync(System.IO.Path.Combine(ResourceParentDir, ResourcePath + Constant.ResourceFileExtension));
+            m_AssetBundleCreateRequest =
+                AssetBundle.LoadFromFileAsync(System.IO.Path.Combine(ResourceParentDir, ResourcePath + Constant.ResourceFileExtension));
             m_AssetBundleCreateRequest.completed += OnAssetBundleCreateRequestComplete;
         }
 
@@ -75,7 +64,7 @@
             if (ResourceObject == null)
             {
                 ErrorMessage = Utility.Text.Format("Failed to create asset bundle from path '{0}'.",
-                                                   System.IO.Path.Combine(ResourceParentDir, ResourcePath));
+                    System.IO.Path.Combine(ResourceParentDir, ResourcePath));
             }
         }
 

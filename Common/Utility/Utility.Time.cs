@@ -9,11 +9,11 @@
             public static TimeStruct GetTimeStruct()
             {
                 return new TimeStruct(
-                    deltaTime: UnityEngine.Time.deltaTime,
-                    unscaledDeltaTime: UnityEngine.Time.unscaledDeltaTime,
-                    time: UnityEngine.Time.time,
-                    unscaledTime: UnityEngine.Time.unscaledTime
-                    );
+                    UnityEngine.Time.deltaTime,
+                    UnityEngine.Time.unscaledDeltaTime,
+                    UnityEngine.Time.time,
+                    UnityEngine.Time.unscaledTime
+                );
             }
         }
     }

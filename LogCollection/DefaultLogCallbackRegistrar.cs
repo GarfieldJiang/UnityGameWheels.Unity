@@ -1,7 +1,7 @@
-﻿namespace COL.UnityGameWheels.Unity
-{
-    using UnityEngine;
+﻿using UnityEngine;
 
+namespace COL.UnityGameWheels.Unity
+{
     public class DefaultLogCallbackRegistrar : ILogCallbackRegistrar
     {
         public void AddLogCallback(Application.LogCallback logCallback)

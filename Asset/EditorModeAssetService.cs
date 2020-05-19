@@ -42,7 +42,7 @@ namespace COL.UnityGameWheels.Unity.Asset
 
         public int UpdateSizeBeforeSavingReadWriteIndex { get; set; }
 
-        private IResourceUpdater m_ResourceUpdater = null;
+        private readonly IResourceUpdater m_ResourceUpdater = null;
 
         public IResourceUpdater ResourceUpdater => m_ResourceUpdater ?? new DummyResourceUpdater();
 
@@ -149,10 +149,7 @@ namespace COL.UnityGameWheels.Unity.Asset
         private IEnumerator PrepareCo(AssetServicePrepareCallbackSet callbackSet, object context)
         {
             yield return null;
-            if (callbackSet.OnSuccess != null)
-            {
-                callbackSet.OnSuccess(context);
-            }
+            callbackSet.OnSuccess?.Invoke(context);
         }
 
         public void UnloadAsset(IAssetAccessor assetAccessor)
@@ -165,13 +162,15 @@ namespace COL.UnityGameWheels.Unity.Asset
 
         public void OnUpdate(TimeStruct timeStruct)
         {
-            if (m_IsPreparing)
+            if (!m_IsPreparing)
             {
-                m_IsPreparing = false;
-                m_PrepareCallbackSet.OnSuccess?.Invoke(m_PrepareContext);
-                m_PrepareCallbackSet = default;
-                m_PrepareContext = null;
+                return;
             }
+
+            m_IsPreparing = false;
+            m_PrepareCallbackSet.OnSuccess?.Invoke(m_PrepareContext);
+            m_PrepareCallbackSet = default;
+            m_PrepareContext = null;
         }
     }
 }

@@ -9,22 +9,12 @@ namespace COL.UnityGameWheels.Unity.Editor
         public string Guid;
         public string AssetBundlePath;
 
-        private HashSet<string> m_DependencyAssetGuids = new HashSet<string>();
-
-        public HashSet<string> DependencyAssetGuids
-        {
-            get
-            {
-                return m_DependencyAssetGuids;
-            }
-        }
+        public HashSet<string> DependencyAssetGuids { get; } = new HashSet<string>();
 
         public static explicit operator Core.Asset.AssetInfo(AssetInfo self)
         {
-            var ret = new Core.Asset.AssetInfo();
-            ret.Path = AssetDatabase.GUIDToAssetPath(self.Guid);
-            ret.ResourcePath = self.AssetBundlePath;
-            ret.DependencyAssetPaths.UnionWith(self.DependencyAssetGuids.Select(guid => AssetDatabase.GUIDToAssetPath(guid)));
+            var ret = new Core.Asset.AssetInfo {Path = AssetDatabase.GUIDToAssetPath(self.Guid), ResourcePath = self.AssetBundlePath};
+            ret.DependencyAssetPaths.UnionWith(self.DependencyAssetGuids.Select(AssetDatabase.GUIDToAssetPath));
             return ret;
         }
     }

@@ -4,12 +4,12 @@ namespace COL.UnityGameWheels.Unity.Editor
 {
     public class AssetBundleOrganizerConfigCache
     {
-        private AssetBundleOrganizerConfig m_Config = null;
+        private readonly AssetBundleOrganizerConfig m_Config = null;
 
-        private Dictionary<string, AssetBundleOrganizerConfig.AssetInfo> m_AssetInfos =
+        private readonly Dictionary<string, AssetBundleOrganizerConfig.AssetInfo> m_AssetInfos =
             new Dictionary<string, AssetBundleOrganizerConfig.AssetInfo>();
 
-        private Dictionary<string, AssetBundleOrganizerConfig.AssetBundleInfo> m_AssetBundleInfos =
+        private readonly Dictionary<string, AssetBundleOrganizerConfig.AssetBundleInfo> m_AssetBundleInfos =
             new Dictionary<string, AssetBundleOrganizerConfig.AssetBundleInfo>();
 
         internal AssetBundleOrganizerConfigCache(AssetBundleOrganizerConfig config)
@@ -63,28 +63,10 @@ namespace COL.UnityGameWheels.Unity.Editor
             }
         }
 
-        public List<AssetBundleOrganizerConfig.RootDirectoryInfo> RootDirectoryInfos
-        {
-            get
-            {
-                return m_Config.RootDirectoryInfos;
-            }
-        }
+        public List<AssetBundleOrganizerConfig.RootDirectoryInfo> RootDirectoryInfos => m_Config.RootDirectoryInfos;
 
-        public IDictionary<string, AssetBundleOrganizerConfig.AssetInfo> AssetInfos
-        {
-            get
-            {
-                return m_AssetInfos;
-            }
-        }
+        public IDictionary<string, AssetBundleOrganizerConfig.AssetInfo> AssetInfos => m_AssetInfos;
 
-        public IDictionary<string, AssetBundleOrganizerConfig.AssetBundleInfo> AssetBundleInfos
-        {
-            get
-            {
-                return m_AssetBundleInfos;
-            }
-        }
+        public IDictionary<string, AssetBundleOrganizerConfig.AssetBundleInfo> AssetBundleInfos => m_AssetBundleInfos;
     }
 }

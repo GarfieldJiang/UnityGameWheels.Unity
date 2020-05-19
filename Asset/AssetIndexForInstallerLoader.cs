@@ -16,7 +16,7 @@ namespace COL.UnityGameWheels.Unity.Asset
         {
             if (behaviour == null)
             {
-                throw new ArgumentNullException("behaviour");
+                throw new ArgumentNullException(nameof(behaviour));
             }
 
             m_MonoBehaviour = behaviour;
@@ -43,10 +43,7 @@ namespace COL.UnityGameWheels.Unity.Asset
             yield return www.SendWebRequest();
             if (!string.IsNullOrEmpty(www.error))
             {
-                if (callbackSet.OnFailure != null)
-                {
-                    callbackSet.OnFailure(context);
-                }
+                callbackSet.OnFailure?.Invoke(context);
             }
             else
             {

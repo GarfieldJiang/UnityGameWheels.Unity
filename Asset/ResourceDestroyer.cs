@@ -10,7 +10,7 @@
             var assetBundle = (AssetBundle)obj;
             if (assetBundle == null)
             {
-                throw new System.ArgumentException("Invalid AssetBundle.", "obj");
+                throw new System.ArgumentException("Invalid AssetBundle.", nameof(obj));
             }
 
             assetBundle.Unload(true);

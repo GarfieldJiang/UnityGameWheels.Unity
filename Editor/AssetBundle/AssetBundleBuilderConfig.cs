@@ -19,6 +19,6 @@ namespace COL.UnityGameWheels.Unity.Editor
         /// </summary>
         public bool CleanUpWorkingDirectoryAfterBuild = true;
 
-        public List<PlatformConfig> PlatformConfigs = new List<PlatformConfig>();
+        public readonly List<PlatformConfig> PlatformConfigs = new List<PlatformConfig>();
     }
 }
