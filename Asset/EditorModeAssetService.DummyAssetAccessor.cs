@@ -1,9 +1,8 @@
 ﻿#if UNITY_EDITOR
+using COL.UnityGameWheels.Core.Asset;
 
 namespace COL.UnityGameWheels.Unity.Asset
 {
-    using Core.Asset;
-
     internal partial class EditorModeAssetService
     {
         private class DummyAssetAccessor : IAssetAccessor

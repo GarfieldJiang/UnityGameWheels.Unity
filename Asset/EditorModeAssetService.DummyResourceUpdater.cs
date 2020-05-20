@@ -1,10 +1,9 @@
 ﻿#if UNITY_EDITOR
+using COL.UnityGameWheels.Core.Asset;
+using System.Collections.Generic;
 
 namespace COL.UnityGameWheels.Unity.Asset
 {
-    using Core.Asset;
-    using System.Collections.Generic;
-
     internal partial class EditorModeAssetService
     {
         private class DummyResourceUpdater : IResourceUpdater

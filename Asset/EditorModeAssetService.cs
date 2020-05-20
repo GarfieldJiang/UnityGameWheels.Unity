@@ -1,15 +1,12 @@
 ﻿#if UNITY_EDITOR
+using COL.UnityGameWheels.Core;
+using COL.UnityGameWheels.Core.Asset;
+using System;
+using System.Collections.Generic;
+using UnityEditor;
 
 namespace COL.UnityGameWheels.Unity.Asset
 {
-    using Core;
-    using Core.Asset;
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using UnityEditor;
-    using UnityEngine;
-
     internal partial class EditorModeAssetService : BaseLifeCycleService, IAssetService, ITickable
     {
         public int ConcurrentAssetLoaderCount { get; set; }
@@ -78,7 +75,7 @@ namespace COL.UnityGameWheels.Unity.Asset
 
             if (assetObj == null)
             {
-                var errorMessage = Utility.Text.Format("Failed to load asset at path '{0}'.", assetPath);
+                var errorMessage = $"Failed to load asset at path '{assetPath}'.";
                 ret.Status = AssetAccessorStatus.Failure;
                 if (callbackSet.OnFailure != null)
                 {
@@ -92,10 +89,7 @@ namespace COL.UnityGameWheels.Unity.Asset
             else
             {
                 ret.Status = AssetAccessorStatus.Ready;
-                if (callbackSet.OnSuccess != null)
-                {
-                    callbackSet.OnSuccess(ret, context);
-                }
+                callbackSet.OnSuccess?.Invoke(ret, context);
             }
 
             return ret;
@@ -107,7 +101,7 @@ namespace COL.UnityGameWheels.Unity.Asset
             var ret = new DummyAssetAccessor {AssetPath = sceneAssetPath, AssetObject = assetObj};
             if (assetObj == null)
             {
-                string errorMessage = Utility.Text.Format("Fail to load scene '{0}'.", sceneAssetPath);
+                string errorMessage = $"Fail to load scene '{sceneAssetPath}'.";
                 if (callbackSet.OnFailure != null)
                 {
                     callbackSet.OnFailure(ret, errorMessage, context);
@@ -119,10 +113,7 @@ namespace COL.UnityGameWheels.Unity.Asset
             }
             else
             {
-                if (callbackSet.OnSuccess != null)
-                {
-                    callbackSet.OnSuccess(ret, context);
-                }
+                callbackSet.OnSuccess?.Invoke(ret, context);
             }
 
             return ret;
@@ -144,12 +135,6 @@ namespace COL.UnityGameWheels.Unity.Asset
             m_IsPreparing = true;
             m_PrepareCallbackSet = callbackSet;
             m_PrepareContext = context;
-        }
-
-        private IEnumerator PrepareCo(AssetServicePrepareCallbackSet callbackSet, object context)
-        {
-            yield return null;
-            callbackSet.OnSuccess?.Invoke(context);
         }
 
         public void UnloadAsset(IAssetAccessor assetAccessor)
