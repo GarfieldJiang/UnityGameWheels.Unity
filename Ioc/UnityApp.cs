@@ -10,12 +10,6 @@ namespace COL.UnityGameWheels.Unity.Ioc
         public static UnityApp Instance { get; private set; }
 
 
-        public event Action OnShutdownComplete
-        {
-            add => Container.OnShutdownComplete += value;
-            remove => Container.OnShutdownComplete -= value;
-        }
-
         protected override void Awake()
         {
             base.Awake();
