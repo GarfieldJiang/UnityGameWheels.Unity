@@ -170,8 +170,9 @@ namespace COL.UnityGameWheels.Unity.Editor
         /// <param name="cleanUpWorkingDirectoryAfterBuild">Whether to clean up working directory after build.</param>
         /// <param name="autoIncrementResourceVersion">Whether to increment resource version.</param>
         /// <param name="buildOptions">Unity BuildAssetBundleOptions.</param>
+        /// <param name="overriddenResourceVersion">Override the internal resource version. When this value is greater than 0, <see cref="autoIncrementResourceVersion"/> will be ignored.
         public void BuildPlatform(ResourcePlatform targetPlatform, bool cleanUpWorkingDirectoryAfterBuild,
-            bool autoIncrementResourceVersion, BuildAssetBundleOptions buildOptions)
+            bool autoIncrementResourceVersion, BuildAssetBundleOptions buildOptions, int overriddenResourceVersion = 0)
         {
             var logger = new Logger(this);
             var handler = CreateHandler();
@@ -180,7 +181,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                 var assetBundleInfos = BeforeBuild(handler, logger, out var assetInfos, out var buildMaps);
 
                 DoBuildPlatform(targetPlatform, cleanUpWorkingDirectoryAfterBuild, autoIncrementResourceVersion,
-                    buildOptions, handler, logger, buildMaps, assetBundleInfos, assetInfos);
+                    overriddenResourceVersion, buildOptions, handler, logger, buildMaps, assetBundleInfos, assetInfos);
                 CallHandlerOnBuildSuccess(handler, logger);
             }
             catch (Exception e)
@@ -218,7 +219,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                     }
 
                     DoBuildPlatform(platformConfig.TargetPlatform, cleanUpWorkingDirectoryAfterBuild,
-                        platformConfig.AutomaticIncrementResourceVersion, m_Config.BuildAssetBundleOptions,
+                        platformConfig.AutomaticIncrementResourceVersion, 0, m_Config.BuildAssetBundleOptions,
                         handler, logger, buildMaps, assetBundleInfos, assetInfos);
                     CallHandlerOnBuildSuccess(handler, logger);
                 }
@@ -238,13 +239,15 @@ namespace COL.UnityGameWheels.Unity.Editor
         private void DoBuildPlatform(ResourcePlatform targetPlatform,
             bool cleanUpWorkingDirectoryAfterBuild,
             bool autoIncVersion,
+            int overriddenResourceVersion,
             BuildAssetBundleOptions buildOptions,
             IAssetBundleBuilderHandler handler,
             Logger logger, AssetBundleBuild[] buildMaps,
             IDictionary<string, AssetBundleInfo> assetBundleInfos,
-            IDictionary<string, AssetInfo> assetInfos)
+            IDictionary<string, AssetInfo> assetInfos
+            )
         {
-            int resourceVersion = GetInternalResourceVersion(PlayerSettings.bundleVersion, targetPlatform);
+            int resourceVersion = overriddenResourceVersion > 0 ? overriddenResourceVersion : GetInternalResourceVersion(PlayerSettings.bundleVersion, targetPlatform);
             logger.Info("Internal resource version for bundle version '{0}' and target platform '{1}' is {2}.",
                 PlayerSettings.bundleVersion, targetPlatform, resourceVersion);
             CallHandlerOnPreBuildPlatform(handler, logger, targetPlatform, resourceVersion);
@@ -278,7 +281,7 @@ namespace COL.UnityGameWheels.Unity.Editor
             logger.Info("Finish generating output.");
 
             var currentResourceVersion = resourceVersion;
-            if (autoIncVersion)
+            if (autoIncVersion && overriddenResourceVersion <= 0)
             {
                 SetInternalResourceVersion(PlayerSettings.bundleVersion, targetPlatform, resourceVersion + 1);
                 logger.Info("Increment internal resource version for next build.");
