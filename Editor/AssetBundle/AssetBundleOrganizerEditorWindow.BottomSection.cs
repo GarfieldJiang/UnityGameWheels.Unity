@@ -178,7 +178,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                     return;
                 }
 
-                EditorUtility.DisplayDialog(m_EditorWindow.titleContent.text, "Depedencies are all legal.", "Okay");
+                EditorUtility.DisplayDialog(m_EditorWindow.titleContent.text, "Dependencies are all legal.", "Okay");
             }
         }
     }
