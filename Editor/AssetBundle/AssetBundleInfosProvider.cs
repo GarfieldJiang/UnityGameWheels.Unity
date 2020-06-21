@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using UnityEditor;
@@ -7,7 +8,7 @@ using UnityEngine;
 
 namespace COL.UnityGameWheels.Unity.Editor
 {
-    public class AssetBundleInfosProvider
+    public partial class AssetBundleInfosProvider
     {
         private readonly AssetBundleOrganizer m_Organizer = null;
 
@@ -29,6 +30,11 @@ namespace COL.UnityGameWheels.Unity.Editor
 
         public IDictionary<string, AssetInfo> AssetInfos => m_AssetInfos;
 
+        private readonly Dictionary<string, UncollectedAssetInfo> m_UncollectedAssetInfos = new Dictionary<string, UncollectedAssetInfo>();
+
+        public IReadOnlyDictionary<string, UncollectedAssetInfo> UncollectedAssetInfos =>
+            new ReadOnlyDictionary<string, UncollectedAssetInfo>(m_UncollectedAssetInfos);
+
 
         public AssetBundleInfosProvider(AssetBundleOrganizer organizer)
         {
@@ -39,6 +45,7 @@ namespace COL.UnityGameWheels.Unity.Editor
         {
             m_AssetBundleInfos.Clear();
             m_AssetInfos.Clear();
+            m_UncollectedAssetInfos.Clear();
             m_IllegalGroupDependencies.Clear();
             PopulateAssetBundleInfos();
             PopulateAssetInfos();
@@ -98,6 +105,8 @@ namespace COL.UnityGameWheels.Unity.Editor
                         continue;
                     }
 
+                    UpdateUncollectedAssets(guid, assetInfo);
+
                     var deps = AssetDatabase.GetDependencies(AssetDatabase.GUIDToAssetPath(guid), false)
                         .Where(path => !path.ToLower().EndsWith(".unity"))
                         .Select(AssetDatabase.AssetPathToGUID);
@@ -113,6 +122,22 @@ namespace COL.UnityGameWheels.Unity.Editor
                     }
                 }
             }
+        }
+
+        private void UpdateUncollectedAssets(string assetGuid, AssetInfo dependingAssetInfo)
+        {
+            if (AssetDatabase.GetMainAssetTypeAtPath(AssetDatabase.GUIDToAssetPath(assetGuid)) == typeof(MonoScript))
+            {
+                return;
+            }
+
+            if (!m_UncollectedAssetInfos.TryGetValue(assetGuid, out var uncollectedAssetInfo))
+            {
+                uncollectedAssetInfo = new UncollectedAssetInfo {Guid = assetGuid};
+                m_UncollectedAssetInfos.Add(assetGuid, uncollectedAssetInfo);
+            }
+
+            uncollectedAssetInfo.AssetGuidsDependingOnThis.Add(dependingAssetInfo.Guid);
         }
 
         private AssetBundleInfo PopulateSingleAssetBundleInfo(AssetBundleOrganizerConfig.AssetBundleInfo abInfo)
