@@ -121,7 +121,7 @@ namespace COL.UnityGameWheels.Unity.Asset
 
         public int GetAssetResourceGroupId(string assetPath)
         {
-            return Constant.CommonResourceGroupId;
+            return Core.Asset.Constant.CommonResourceGroupId;
         }
 
         public bool IsLoadingAnyAsset => false;
