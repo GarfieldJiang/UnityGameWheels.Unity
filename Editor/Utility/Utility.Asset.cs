@@ -10,7 +10,7 @@ namespace COL.UnityGameWheels.Unity.Editor
             {
                 if (string.IsNullOrEmpty(field))
                 {
-                    field = AssetDatabase.AssetPathToGUID(guid);
+                    field = AssetDatabase.GUIDToAssetPath(guid);
                 }
 
                 return field;
