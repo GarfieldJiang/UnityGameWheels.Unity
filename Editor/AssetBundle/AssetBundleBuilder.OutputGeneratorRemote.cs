@@ -1,4 +1,6 @@
-﻿namespace COL.UnityGameWheels.Unity.Editor
+﻿using COL.UnityGameWheels.Core.Asset;
+
+namespace COL.UnityGameWheels.Unity.Editor
 {
     using Asset;
     using Newtonsoft.Json;
@@ -60,7 +62,7 @@
                 {
                     using (var bw = new BinaryWriter(fs, Encoding.UTF8))
                     {
-                        assetIndex.ToBinary(bw);
+                        new AssetIndexSerializerV2().ToBinary(bw, assetIndex);
                     }
                 }
 
