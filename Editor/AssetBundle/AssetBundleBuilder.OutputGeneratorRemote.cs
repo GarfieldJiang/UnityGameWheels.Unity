@@ -1,8 +1,7 @@
-﻿using COL.UnityGameWheels.Core.Asset;
-
-namespace COL.UnityGameWheels.Unity.Editor
+﻿namespace COL.UnityGameWheels.Unity.Editor
 {
     using Asset;
+    using Core.Asset;
     using Newtonsoft.Json;
     using System.Collections.Generic;
     using System.IO;
@@ -12,7 +11,6 @@ namespace COL.UnityGameWheels.Unity.Editor
     {
         private class OutputGeneratorRemote : OutputGeneratorBase
         {
-            protected override int IndexVersion => 1;
 
             public OutputGeneratorRemote(AssetBundleBuilder builder, string generatorDirectoryName)
                 : base(builder, generatorDirectoryName)

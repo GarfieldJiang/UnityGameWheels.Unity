@@ -4,15 +4,12 @@
     using Core.Asset;
     using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
 
     public partial class AssetBundleBuilder
     {
         private abstract class OutputGeneratorBase
         {
             protected readonly AssetBundleBuilder m_Builder = null;
-
-            protected abstract int IndexVersion { get; }
 
             private string GeneratorDirectoryName { get; }
 

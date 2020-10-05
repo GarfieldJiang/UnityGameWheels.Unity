@@ -1,20 +1,16 @@
-﻿using COL.UnityGameWheels.Core.Asset;
-
-namespace COL.UnityGameWheels.Unity.Editor
+﻿namespace COL.UnityGameWheels.Unity.Editor
 {
     using Asset;
+    using Core.Asset;
     using Newtonsoft.Json;
     using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
     using System.Text;
 
     public partial class AssetBundleBuilder
     {
         private class OutputGeneratorInstaller : OutputGeneratorBase
         {
-            protected override int IndexVersion => 1;
-
             private readonly bool m_ConsiderDontPackFlag;
 
             public OutputGeneratorInstaller(AssetBundleBuilder builder,
