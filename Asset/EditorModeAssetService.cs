@@ -121,6 +121,10 @@ namespace COL.UnityGameWheels.Unity.Asset
 
         public int GetAssetResourceGroupId(string assetPath)
         {
+            if (string.IsNullOrEmpty(AssetDatabase.AssetPathToGUID(assetPath)))
+            {
+                return Core.Asset.Constant.Constant.InvalidResourceGroupId;
+            }
             return Core.Asset.Constant.CommonResourceGroupId;
         }
 
