@@ -123,7 +123,7 @@ namespace COL.UnityGameWheels.Unity.Asset
         {
             if (string.IsNullOrEmpty(AssetDatabase.AssetPathToGUID(assetPath)))
             {
-                return Core.Asset.Constant.Constant.InvalidResourceGroupId;
+                return Core.Asset.Constant.InvalidResourceGroupId;
             }
             return Core.Asset.Constant.CommonResourceGroupId;
         }
