@@ -12,9 +12,9 @@ namespace COL.UnityGameWheels.Unity.Asset
     {
         public static IBindingData Bind(IContainer container, AssetServiceConfig config, MonoBehaviourEx mb)
         {
-            Guard.RequireNotNull<ArgumentNullException>(container, $"Invalid '{container}'.");
-            Guard.RequireNotNull<ArgumentNullException>(config, $"Invalid '{config}'.");
-            Guard.RequireNotNull<ArgumentNullException>(mb, $"Invalid '{mb}'.");
+            Guard.RequireNotNull<ArgumentNullException>(container, $"Invalid '{nameof(container)}'.");
+            Guard.RequireNotNull<ArgumentNullException>(config, $"Invalid '{nameof(config)}'.");
+            Guard.RequireNotNull<ArgumentNullException>(mb, $"Invalid '{nameof(mb)}'.");
             IBindingData bindingData;
 #if UNITY_EDITOR
             bindingData = config.EditorMode ? container.BindSingleton<IAssetService, EditorModeAssetService>() : BindRealAssetService(container, config, mb);
