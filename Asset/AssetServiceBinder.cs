@@ -30,12 +30,9 @@ namespace COL.UnityGameWheels.Unity.Asset
             container.BindSingleton<IAssetLoadingTaskImpl, AssetLoadingTaskImpl>();
             container.BindSingleton<ISimpleFactory<IAssetLoadingTaskImpl>, AssetLoadingTaskImplFactory>();
             container.BindSingleton<ISimpleFactory<IResourceLoadingTaskImpl>, ResourceLoadingTaskImplFactory>();
+            container.BindInstance<IAssetIndexForInstallerLoader>(new AssetIndexForInstallerLoader(mb));
 
-            return container.BindSingleton<IAssetService, AssetService>(new PropertyInjection
-                {
-                    PropertyName = "IndexForInstallerLoader",
-                    Value = new AssetIndexForInstallerLoader(mb),
-                })
+            return container.BindSingleton<IAssetService, AssetService>()
                 .OnPreInit(serviceInstance =>
                 {
                     var assetService = (AssetService)serviceInstance;
