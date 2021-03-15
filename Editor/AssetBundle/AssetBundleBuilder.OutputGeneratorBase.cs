@@ -74,6 +74,7 @@
                 foreach (var assetInfo in assetInfos.Values)
                 {
                     var resPath = assetInfo.ResourcePath;
+                    var resBasicInfo = resourceBasicInfos[resPath];
                     foreach (var depAssetPath in assetInfo.DependencyAssetPaths)
                     {
                         if (!assetInfos.ContainsKey(depAssetPath))
@@ -87,7 +88,7 @@
                             continue;
                         }
 
-                        resourceBasicInfos[depResPath].DependingResourcePaths.Add(resPath);
+                        resBasicInfo.DependencyResourcePaths.Add(depResPath);
                     }
                 }
             }
