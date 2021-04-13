@@ -7,6 +7,8 @@
 
     public class ResourceLoadingTaskImpl : IResourceLoadingTaskImpl
     {
+        public const int MaxTryTimes = 5;
+
         public string ResourcePath { get; set; }
 
         public string ResourceParentDir { get; set; }
@@ -14,8 +16,9 @@
         public object ResourceObject { get; private set; }
 
         private AssetBundleCreateRequest m_AssetBundleCreateRequest = null;
+        private int m_TryCount = 0;
 
-        public bool IsDone => m_AssetBundleCreateRequest?.isDone ?? false;
+        public bool IsDone { get; private set; } = false;
 
         public float Progress => m_AssetBundleCreateRequest?.progress ?? 0f;
 
@@ -39,10 +42,21 @@
 
             ResourcePath = null;
             ResourceParentDir = null;
+            IsDone = false;
+        }
+
+        private void Restart()
+        {
+            m_TryCount++;
+            m_AssetBundleCreateRequest =
+                AssetBundle.LoadFromFileAsync(System.IO.Path.Combine(ResourceParentDir, ResourcePath + Constant.ResourceFileExtension));
+            m_AssetBundleCreateRequest.completed += OnAssetBundleCreateRequestComplete;
         }
 
         public void OnStart()
         {
+            IsDone = false;
+            m_TryCount = 0;
             if (string.IsNullOrEmpty(ResourcePath))
             {
                 throw new InvalidOperationException("Asset path is invalid.");
@@ -53,19 +67,32 @@
                 throw new InvalidOperationException("Already started");
             }
 
-            m_AssetBundleCreateRequest =
-                AssetBundle.LoadFromFileAsync(System.IO.Path.Combine(ResourceParentDir, ResourcePath + Core.Asset.Constant.ResourceFileExtension));
-            m_AssetBundleCreateRequest.completed += OnAssetBundleCreateRequestComplete;
+            Restart();
+        }
+
+        private string CreateErrorMessage()
+        {
+            return $"Failed to create asset bundle from path '{System.IO.Path.Combine(ResourceParentDir, ResourcePath)}'.";
         }
 
         private void OnAssetBundleCreateRequestComplete(AsyncOperation asyncOperation)
         {
             ResourceObject = m_AssetBundleCreateRequest.assetBundle;
-            if (ResourceObject == null)
+            if (ResourceObject != null)
             {
-                ErrorMessage = Utility.Text.Format("Failed to create asset bundle from path '{0}'.",
-                    System.IO.Path.Combine(ResourceParentDir, ResourcePath));
+                IsDone = true;
+                return;
             }
+
+            if (m_TryCount >= MaxTryTimes)
+            {
+                IsDone = true;
+                ErrorMessage = CreateErrorMessage();
+                return;
+            }
+
+            Log.Warning(CreateErrorMessage());
+            Restart();
         }
 
         public void OnUpdate(TimeStruct timeStruct)
