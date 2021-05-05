@@ -24,7 +24,7 @@ namespace COL.UnityGameWheels.Unity.Editor
 
         private string ResourceCacheQueriesFoldoutKey => Core.Utility.Text.Format("{0}.ResourceCacheQueriesFoldout", GetType().FullName);
 
-        protected internal override bool DrawContent(ITickableContainer container, object serviceInstance)
+        protected internal override bool DrawContent(object serviceInstance)
         {
             var assetService = (AssetService)serviceInstance;
             DrawQueries(assetService);

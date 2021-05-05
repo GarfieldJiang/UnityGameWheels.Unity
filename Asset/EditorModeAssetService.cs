@@ -7,7 +7,7 @@ using UnityEditor;
 
 namespace COL.UnityGameWheels.Unity.Asset
 {
-    internal partial class EditorModeAssetService : BaseLifeCycleService, IAssetService, ITickable
+    internal partial class EditorModeAssetService : TickableLifeCycleService, IAssetService
     {
         public int ConcurrentAssetLoaderCount { get; set; }
 
@@ -71,7 +71,7 @@ namespace COL.UnityGameWheels.Unity.Asset
         public IAssetAccessor LoadAsset(string assetPath, LoadAssetCallbackSet callbackSet, object context)
         {
             var assetObj = AssetDatabase.LoadAssetAtPath(assetPath, typeof(UnityEngine.Object));
-            var ret = new DummyAssetAccessor {AssetPath = assetPath, AssetObject = assetObj};
+            var ret = new DummyAssetAccessor { AssetPath = assetPath, AssetObject = assetObj };
 
             if (assetObj == null)
             {
@@ -98,7 +98,7 @@ namespace COL.UnityGameWheels.Unity.Asset
         public IAssetAccessor LoadSceneAsset(string sceneAssetPath, LoadAssetCallbackSet callbackSet, object context)
         {
             var assetObj = AssetDatabase.LoadAssetAtPath(sceneAssetPath, typeof(UnityEngine.Object));
-            var ret = new DummyAssetAccessor {AssetPath = sceneAssetPath, AssetObject = assetObj};
+            var ret = new DummyAssetAccessor { AssetPath = sceneAssetPath, AssetObject = assetObj };
             if (assetObj == null)
             {
                 string errorMessage = $"Fail to load scene '{sceneAssetPath}'.";
@@ -125,6 +125,7 @@ namespace COL.UnityGameWheels.Unity.Asset
             {
                 return Core.Asset.Constant.InvalidResourceGroupId;
             }
+
             return Core.Asset.Constant.CommonResourceGroupId;
         }
 
@@ -149,7 +150,7 @@ namespace COL.UnityGameWheels.Unity.Asset
             dummyAssetAccessor.Status = AssetAccessorStatus.None;
         }
 
-        public void OnUpdate(TimeStruct timeStruct)
+        protected override void OnUpdate(TimeStruct timeStruct)
         {
             if (!m_IsPreparing)
             {

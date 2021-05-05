@@ -31,9 +31,9 @@ namespace COL.UnityGameWheels.Unity.Editor
 
         private int ReverseSortingOrderComparisonFactor => m_ReverseSortingOrder ? -1 : 1;
 
-        protected internal override void OnShow(ITickableContainer container, object serviceInstance)
+        protected internal override void OnShow(object serviceInstance)
         {
-            base.OnShow(container, serviceInstance);
+            base.OnShow(serviceInstance);
             Refresh((RefPoolService)serviceInstance);
         }
 
@@ -79,7 +79,7 @@ namespace COL.UnityGameWheels.Unity.Editor
             m_FilteredPoolWeakRefs.Sort(compareFunc);
         }
 
-        protected internal override bool DrawContent(ITickableContainer container, object serviceInstance)
+        protected internal override bool DrawContent(object serviceInstance)
         {
             var poolSectionFoldout = CheckPoolSectionFoldout();
 

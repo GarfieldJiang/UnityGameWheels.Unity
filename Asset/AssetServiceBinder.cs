@@ -10,7 +10,7 @@ namespace COL.UnityGameWheels.Unity.Asset
 {
     public static class AssetServiceBinder
     {
-        public static IBindingData Bind(IContainer container, AssetServiceConfig config, MonoBehaviourEx mb)
+        public static IBindingData Bind(Container container, AssetServiceConfig config, MonoBehaviourEx mb)
         {
             Guard.RequireNotNull<ArgumentNullException>(container, $"Invalid '{nameof(container)}'.");
             Guard.RequireNotNull<ArgumentNullException>(config, $"Invalid '{nameof(config)}'.");
@@ -24,7 +24,7 @@ namespace COL.UnityGameWheels.Unity.Asset
             return bindingData;
         }
 
-        private static IBindingData BindRealAssetService(IContainer container, AssetServiceConfig config,
+        private static IBindingData BindRealAssetService(Container container, AssetServiceConfig config,
             MonoBehaviourEx mb)
         {
             container.BindSingleton<IAssetLoadingTaskImpl, AssetLoadingTaskImpl>();

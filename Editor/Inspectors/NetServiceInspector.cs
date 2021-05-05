@@ -13,7 +13,7 @@ namespace COL.UnityGameWheels.Unity.Editor
 
         private readonly HashSet<string> m_FoldoutNetChannelNames = new HashSet<string>();
 
-        protected internal override bool DrawContent(ITickableContainer container, object serviceInstance)
+        protected internal override bool DrawContent(object serviceInstance)
         {
             var netService = (NetService)serviceInstance;
             m_NetChannels.Clear();

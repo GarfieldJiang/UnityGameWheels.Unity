@@ -5,7 +5,7 @@ namespace COL.UnityGameWheels.Unity.Editor
 {
     public abstract class BaseServiceInspector
     {
-        protected internal virtual void OnShow(ITickableContainer container, object serviceInstance)
+        protected internal virtual void OnShow(object serviceInstance)
         {
             //Debug.Log($"[{GetType()} {nameof(OnShow)}]");
         }
@@ -21,6 +21,6 @@ namespace COL.UnityGameWheels.Unity.Editor
         /// <param name="container"></param>
         /// <param name="serviceInstance"></param>
         /// <returns>Whether the outer view should repaint.</returns>
-        protected internal abstract bool DrawContent(ITickableContainer container, object serviceInstance);
+        protected internal abstract bool DrawContent(object serviceInstance);
     }
 }

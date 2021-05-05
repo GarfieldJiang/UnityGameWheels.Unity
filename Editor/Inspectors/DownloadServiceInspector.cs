@@ -18,7 +18,7 @@ namespace COL.UnityGameWheels.Unity.Editor
         private readonly Dictionary<int, bool> m_DownloadTaskFoldouts = new Dictionary<int, bool>();
         private int m_TaskIdToStop = -1;
 
-        protected internal override bool DrawContent(ITickableContainer container, object serviceInstance)
+        protected internal override bool DrawContent(object serviceInstance)
         {
             var downloadService = (DownloadService)serviceInstance;
             DrawWaitingDownloadTasks(downloadService);

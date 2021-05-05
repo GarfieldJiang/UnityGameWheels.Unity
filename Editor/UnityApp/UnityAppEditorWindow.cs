@@ -6,6 +6,7 @@ using UnityEditor;
 using UnityEngine;
 #if UNITY_2019_1_OR_NEWER
 using UnityEngine.UIElements;
+
 #endif
 
 namespace COL.UnityGameWheels.Unity.Editor
@@ -260,7 +261,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                     }
                 }
 
-                serviceInspector?.OnShow(unityApp.Container, m_InspectedServiceInstance);
+                serviceInspector?.OnShow(m_InspectedServiceInstance);
             }
 
             if (m_InspectedServiceType != null)
@@ -269,7 +270,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                 if (serviceInspector != null)
                 {
                     EditorGUILayout.BeginVertical();
-                    ret = serviceInspector.DrawContent(unityApp.Container, m_InspectedServiceInstance);
+                    ret = serviceInspector.DrawContent(m_InspectedServiceInstance);
                     EditorGUILayout.EndVertical();
                 }
             }
@@ -312,18 +313,17 @@ namespace COL.UnityGameWheels.Unity.Editor
             EditorGUILayout.BeginVertical();
             {
                 EditorGUILayout.LabelField($"Type: {container.GetType()}");
-                EditorGUILayout.LabelField($"Is Requesting Shutdown: {container.IsRequestingShutdown}");
-                EditorGUILayout.LabelField($"Is Shutting Down: {container.IsShuttingDown}");
-                EditorGUILayout.LabelField($"Is Shut: {container.IsShut}");
-                if (!container.IsRequestingShutdown && !container.IsShuttingDown && !container.IsShut)
+                EditorGUILayout.LabelField($"Is Disposing: {container.IsDisposing}");
+                EditorGUILayout.LabelField($"Is Disposed: {container.IsDisposed}");
+                if (!container.IsDisposing && !container.IsDisposed)
                 {
                     var rect = EditorGUILayout.BeginHorizontal();
                     // TODO: Unity bug or I use it wrongly? Why do I have to do the indentation by hand?
                     var indentedRect = EditorGUI.IndentedRect(rect);
                     EditorGUILayout.Space(indentedRect.xMin - rect.xMin, false);
-                    if (GUILayout.Button("Request Shutdown"))
+                    if (GUILayout.Button("Dispose"))
                     {
-                        container.RequestShutdown();
+                        container.Dispose();
                     }
 
                     EditorGUILayout.EndHorizontal();

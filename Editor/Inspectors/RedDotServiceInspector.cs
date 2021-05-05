@@ -8,7 +8,7 @@ namespace COL.UnityGameWheels.Unity.Editor
     [UnityAppEditor(typeof(RedDotService))]
     public class RedDotServiceInspector : BaseServiceInspector
     {
-        protected internal override bool DrawContent(ITickableContainer container, object serviceInstance)
+        protected internal override bool DrawContent(object serviceInstance)
         {
             var t = (RedDotService)serviceInstance;
             EditorGUI.BeginDisabledGroup(!t.IsSetUp);

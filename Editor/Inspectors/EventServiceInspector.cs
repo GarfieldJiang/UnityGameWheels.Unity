@@ -33,7 +33,7 @@ namespace COL.UnityGameWheels.Unity.Editor
         private bool m_ShowListeners = false;
         private Dictionary<int, LinkedList<OnHearEvent>> m_Listeners = null;
 
-        protected internal override bool DrawContent(ITickableContainer container, object serviceInstance)
+        protected internal override bool DrawContent(object serviceInstance)
         {
             var eventService = (EventService)serviceInstance;
             EnsureInit(eventService);
