@@ -49,7 +49,8 @@
         {
             m_TryCount++;
             m_AssetBundleCreateRequest =
-                AssetBundle.LoadFromFileAsync(System.IO.Path.Combine(ResourceParentDir, ResourcePath + Constant.ResourceFileExtension));
+                AssetBundle.LoadFromFileAsync(System.IO.Path.Combine(ResourceParentDir,
+                    ResourcePath + Core.Asset.Constant.ResourceFileExtension));
             m_AssetBundleCreateRequest.completed += OnAssetBundleCreateRequestComplete;
         }
 
