@@ -7,28 +7,8 @@ using UnityEditor;
 
 namespace COL.UnityGameWheels.Unity.Asset
 {
-    internal partial class EditorModeAssetService : TickableLifeCycleService, IAssetService
+    internal partial class EditorModeAssetService : TickableService, IAssetService
     {
-        public int ConcurrentAssetLoaderCount { get; set; }
-
-        public int ConcurrentResourceLoaderCount { get; set; }
-
-        public int AssetCachePoolCapacity { get; set; }
-
-        public int ResourceCachePoolCapacity { get; set; }
-
-        public int AssetAccessorPoolCapacity { get; set; }
-
-        public int DownloadRetryCount { get; set; }
-
-        public float ReleaseResourceInterval { get; set; }
-
-        public IAssetIndexForInstallerLoader IndexForInstallerLoader { get; set; }
-
-        public bool UpdateIsEnabled { get; set; }
-
-        public string UpdateRelativePathFormat { get; set; }
-
         public string BundleVersion { get; set; }
 
         public string ReadWritePath { get; set; }
@@ -67,6 +47,8 @@ namespace COL.UnityGameWheels.Unity.Asset
         {
             throw new NotSupportedException();
         }
+
+        public IAssetServiceConfigReader ConfigReader { get; }
 
         public IAssetAccessor LoadAsset(string assetPath, LoadAssetCallbackSet callbackSet, object context)
         {
@@ -161,6 +143,10 @@ namespace COL.UnityGameWheels.Unity.Asset
             m_PrepareCallbackSet.OnSuccess?.Invoke(m_PrepareContext);
             m_PrepareCallbackSet = default;
             m_PrepareContext = null;
+        }
+
+        public EditorModeAssetService(ITickService tickService) : base(tickService)
+        {
         }
     }
 }
