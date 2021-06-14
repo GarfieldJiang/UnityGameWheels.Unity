@@ -48,8 +48,6 @@ namespace COL.UnityGameWheels.Unity.Asset
             throw new NotSupportedException();
         }
 
-        public IAssetServiceConfigReader ConfigReader { get; }
-
         public IAssetAccessor LoadAsset(string assetPath, LoadAssetCallbackSet callbackSet, object context)
         {
             var assetObj = AssetDatabase.LoadAssetAtPath(assetPath, typeof(UnityEngine.Object));
