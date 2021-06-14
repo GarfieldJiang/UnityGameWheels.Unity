@@ -174,7 +174,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                     EditorGUI.indentLevel++;
                     EditorGUILayout.LabelField("Interface:", bindingData.InterfaceType?.ToString() ?? "<null>");
                     EditorGUILayout.LabelField("Impl:", bindingData.ImplType?.ToString() ?? "<null>");
-                    EditorGUILayout.LabelField("Life Cycle Managed:", bindingData.LifeCycleManaged.ToString());
+                    EditorGUILayout.LabelField("Life Style:", bindingData.LifeStyle.ToString());
                     EditorGUI.indentLevel--;
                 }
             }
@@ -276,9 +276,8 @@ namespace COL.UnityGameWheels.Unity.Editor
         private BaseServiceInspector CreateInspectorOrNull(IBindingData bindingData)
         {
             var implType = bindingData.ImplType;
-
-            var lifeCycleManaged = bindingData.LifeCycleManaged;
-            if (!lifeCycleManaged || !m_TypeToInspectorTypeMap.TryGetValue(implType, out var inspectorType))
+            if ((bindingData.LifeStyle != LifeStyles.Singleton && bindingData.LifeStyle != LifeStyles.Null) ||
+                !m_TypeToInspectorTypeMap.TryGetValue(implType, out var inspectorType))
             {
                 return null;
             }
