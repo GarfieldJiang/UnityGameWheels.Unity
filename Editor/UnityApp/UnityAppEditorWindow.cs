@@ -19,6 +19,7 @@ namespace COL.UnityGameWheels.Unity.Editor
         private bool m_ShowContainerStatusSection = false;
         private bool m_ShowBindingDataSection = false;
         private bool m_ShowSingletonSection = false;
+        private bool m_ShowInstanceSection = false;
         private Type m_LastInspectedServiceType = null;
         private Type m_InspectedServiceType = null;
         private object m_InspectedServiceInstance = null;
@@ -128,7 +129,10 @@ namespace COL.UnityGameWheels.Unity.Editor
                         if (UnityApp.Instance.Container != null)
                         {
                             DrawBindingDataSection(UnityApp.Instance);
-                            DrawSingletonSection(UnityApp.Instance);
+                            bool clickedAnyInspect = false;
+                            bool lastInstanceExists = false;
+                            DrawSingletonSection(UnityApp.Instance, ref clickedAnyInspect, ref lastInstanceExists);
+                            DrawInstanceSection(UnityApp.Instance, ref clickedAnyInspect, ref lastInstanceExists);
                             EditorGUILayout.Space();
                             ret = DrawInspectorSection(UnityApp.Instance);
                             drawInspectorSection = true;
@@ -182,18 +186,57 @@ namespace COL.UnityGameWheels.Unity.Editor
             EditorGUI.indentLevel--;
         }
 
-        private void DrawSingletonSection(UnityApp unityApp)
+        private void DrawSingletonSection(UnityApp unityApp, ref bool clickedAnyInspect, ref bool lastInstanceExists)
         {
-            m_ShowSingletonSection = EditorGUILayout.Foldout(m_ShowSingletonSection, "Instances", EditorStyles.foldoutHeader);
+            m_ShowSingletonSection = EditorGUILayout.Foldout(m_ShowSingletonSection, "Singletons", EditorStyles.foldoutHeader);
             if (!m_ShowSingletonSection)
             {
                 return;
             }
 
             EditorGUI.indentLevel++;
-            bool clickedAnyInspect = false;
-            bool lastInstanceExists = false;
             foreach (var kv in unityApp.Container.GetSingletons())
+            {
+                var serviceType = kv.Key;
+                var serviceInstance = kv.Value;
+                EditorGUILayout.BeginHorizontal();
+                {
+                    EditorGUILayout.LabelField(serviceType.FullName);
+                    if (GUILayout.Button("Inspect", GUILayout.MaxWidth(80f)))
+                    {
+                        m_InspectedServiceType = serviceType;
+                        m_InspectedServiceInstance = serviceInstance;
+                        clickedAnyInspect = true;
+                    }
+                }
+
+                if (!clickedAnyInspect && serviceInstance == m_InspectedServiceInstance)
+                {
+                    lastInstanceExists = true;
+                }
+
+                EditorGUILayout.EndHorizontal();
+            }
+
+            if (!clickedAnyInspect && !lastInstanceExists)
+            {
+                m_InspectedServiceType = null;
+                m_InspectedServiceInstance = null;
+            }
+
+            EditorGUI.indentLevel--;
+        }
+
+        private void DrawInstanceSection(UnityApp unityApp, ref bool clickedAnyInspect, ref bool lastInstanceExists)
+        {
+            m_ShowInstanceSection = EditorGUILayout.Foldout(m_ShowInstanceSection, "Instances", EditorStyles.foldoutHeader);
+            if (!m_ShowInstanceSection)
+            {
+                return;
+            }
+
+            EditorGUI.indentLevel++;
+            foreach (var kv in unityApp.Container.GetInstances())
             {
                 var serviceType = kv.Key;
                 var serviceInstance = kv.Value;
