@@ -10,7 +10,7 @@ namespace COL.UnityGameWheels.Unity.Asset
         {
             public bool IsReady => true;
 
-            public int[] GetAvailableResourceGroupIds()
+            public IEnumerable<int> GetAvailableResourceGroupIds()
             {
                 return new int[0];
             }
@@ -18,6 +18,11 @@ namespace COL.UnityGameWheels.Unity.Asset
             public void GetAvailableResourceGroupIds(List<int> groupIds)
             {
                 groupIds.Clear();
+            }
+
+            public bool ResourceGroupIdIsAvailable(int groupId)
+            {
+                return true;
             }
 
             public ResourceGroupStatus GetResourceGroupStatus(int groupId)
