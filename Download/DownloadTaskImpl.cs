@@ -93,6 +93,13 @@ namespace COL.UnityGameWheels.Unity
                 ErrorMessage = m_WebRequestAsyncOperation.webRequest.error;
                 return;
             }
+
+            if (webRequest.isHttpError)
+            {
+                ErrorCode = DownloadErrorCode.Web;
+                ErrorMessage = m_WebRequestAsyncOperation.webRequest.error;
+                return;
+            }
         }
     }
 }

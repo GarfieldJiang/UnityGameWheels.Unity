@@ -2,10 +2,8 @@
 
 namespace COL.UnityGameWheels.Unity
 {
-    public interface ILogCollectionService : ILifeCycle
+    public interface ILogCollectionService
     {
-        ILogCallbackRegistrar LogCallbackRegistrar { get; set; }
-
         void AddLogCollector(ILogCollector collector);
 
         void RemoveLogCollector(ILogCollector collector);
