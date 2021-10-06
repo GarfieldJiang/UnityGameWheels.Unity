@@ -19,16 +19,15 @@ namespace COL.UnityGameWheels.Unity.Editor
         private bool m_ShowContainerStatusSection = false;
         private bool m_ShowBindingDataSection = false;
         private bool m_ShowSingletonSection = false;
+        private bool m_ShowInstanceSection = false;
         private Type m_LastInspectedServiceType = null;
         private Type m_InspectedServiceType = null;
         private object m_InspectedServiceInstance = null;
-        private string m_InspectedServiceName = null;
-        private string m_LastInspectedServiceName = null;
         private bool m_LastDrawInspectorSection = false;
-        private readonly Dictionary<string, BaseServiceInspector> m_Inspectors = new Dictionary<string, BaseServiceInspector>();
+        private readonly Dictionary<Type, BaseServiceInspector> m_Inspectors = new Dictionary<Type, BaseServiceInspector>();
         private readonly HashSet<Type> m_TriedToCreateInspectorTypes = new HashSet<Type>();
         private readonly Dictionary<Type, Type> m_TypeToInspectorTypeMap = new Dictionary<Type, Type>();
-        private readonly HashSet<string> m_BindingDataFoldoutFlags = new HashSet<string>();
+        private readonly HashSet<Type> m_BindingDataFoldoutFlags = new HashSet<Type>();
         private Vector2 m_ScrollPosition = Vector2.zero;
 
         public static void Open()
@@ -70,15 +69,13 @@ namespace COL.UnityGameWheels.Unity.Editor
         {
             if (m_InspectedServiceInstance != null)
             {
-                if (m_Inspectors.TryGetValue(m_InspectedServiceName, out var serviceInspector))
+                if (m_Inspectors.TryGetValue(m_InspectedServiceType, out var serviceInspector))
                 {
                     serviceInspector.OnHide();
                 }
             }
 
             m_LastInspectedServiceType = null;
-            m_LastInspectedServiceName = null;
-            m_InspectedServiceName = null;
             m_InspectedServiceType = null;
             m_InspectedServiceInstance = null;
         }
@@ -132,7 +129,10 @@ namespace COL.UnityGameWheels.Unity.Editor
                         if (UnityApp.Instance.Container != null)
                         {
                             DrawBindingDataSection(UnityApp.Instance);
-                            DrawSingletonSection(UnityApp.Instance);
+                            bool clickedAnyInspect = false;
+                            bool lastInstanceExists = false;
+                            DrawSingletonSection(UnityApp.Instance, ref clickedAnyInspect, ref lastInstanceExists);
+                            DrawInstanceSection(UnityApp.Instance, ref clickedAnyInspect, ref lastInstanceExists);
                             EditorGUILayout.Space();
                             ret = DrawInspectorSection(UnityApp.Instance);
                             drawInspectorSection = true;
@@ -157,19 +157,19 @@ namespace COL.UnityGameWheels.Unity.Editor
             EditorGUI.indentLevel++;
             foreach (var kv in unityApp.Container.GetBindingDatas())
             {
-                var serviceName = kv.Key;
+                var serviceType = kv.Key;
                 var bindingData = kv.Value;
-                var oldFoldout = m_BindingDataFoldoutFlags.Contains(serviceName);
-                var newFoldout = EditorGUILayout.Foldout(oldFoldout, serviceName);
+                var oldFoldout = m_BindingDataFoldoutFlags.Contains(serviceType);
+                var newFoldout = EditorGUILayout.Foldout(oldFoldout, serviceType.FullName);
                 if (newFoldout != oldFoldout)
                 {
                     if (newFoldout)
                     {
-                        m_BindingDataFoldoutFlags.Add(serviceName);
+                        m_BindingDataFoldoutFlags.Add(serviceType);
                     }
                     else
                     {
-                        m_BindingDataFoldoutFlags.Remove(serviceName);
+                        m_BindingDataFoldoutFlags.Remove(serviceType);
                     }
                 }
 
@@ -178,7 +178,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                     EditorGUI.indentLevel++;
                     EditorGUILayout.LabelField("Interface:", bindingData.InterfaceType?.ToString() ?? "<null>");
                     EditorGUILayout.LabelField("Impl:", bindingData.ImplType?.ToString() ?? "<null>");
-                    EditorGUILayout.LabelField("Life Cycle Managed:", bindingData.LifeCycleManaged.ToString());
+                    EditorGUILayout.LabelField("Life Style:", bindingData.LifeStyle.ToString());
                     EditorGUI.indentLevel--;
                 }
             }
@@ -186,28 +186,25 @@ namespace COL.UnityGameWheels.Unity.Editor
             EditorGUI.indentLevel--;
         }
 
-        private void DrawSingletonSection(UnityApp unityApp)
+        private void DrawSingletonSection(UnityApp unityApp, ref bool clickedAnyInspect, ref bool lastInstanceExists)
         {
-            m_ShowSingletonSection = EditorGUILayout.Foldout(m_ShowSingletonSection, "Instances", EditorStyles.foldoutHeader);
+            m_ShowSingletonSection = EditorGUILayout.Foldout(m_ShowSingletonSection, "Singletons", EditorStyles.foldoutHeader);
             if (!m_ShowSingletonSection)
             {
                 return;
             }
 
             EditorGUI.indentLevel++;
-            bool clickedAnyInspect = false;
-            bool lastInstanceExists = false;
             foreach (var kv in unityApp.Container.GetSingletons())
             {
-                var serviceName = kv.Key;
+                var serviceType = kv.Key;
                 var serviceInstance = kv.Value;
                 EditorGUILayout.BeginHorizontal();
                 {
-                    EditorGUILayout.LabelField(serviceName);
+                    EditorGUILayout.LabelField(serviceType.FullName);
                     if (GUILayout.Button("Inspect", GUILayout.MaxWidth(80f)))
                     {
-                        m_InspectedServiceName = serviceName;
-                        m_InspectedServiceType = serviceInstance.GetType();
+                        m_InspectedServiceType = serviceType;
                         m_InspectedServiceInstance = serviceInstance;
                         clickedAnyInspect = true;
                     }
@@ -223,7 +220,47 @@ namespace COL.UnityGameWheels.Unity.Editor
 
             if (!clickedAnyInspect && !lastInstanceExists)
             {
-                m_InspectedServiceName = null;
+                m_InspectedServiceType = null;
+                m_InspectedServiceInstance = null;
+            }
+
+            EditorGUI.indentLevel--;
+        }
+
+        private void DrawInstanceSection(UnityApp unityApp, ref bool clickedAnyInspect, ref bool lastInstanceExists)
+        {
+            m_ShowInstanceSection = EditorGUILayout.Foldout(m_ShowInstanceSection, "Instances", EditorStyles.foldoutHeader);
+            if (!m_ShowInstanceSection)
+            {
+                return;
+            }
+
+            EditorGUI.indentLevel++;
+            foreach (var kv in unityApp.Container.GetInstances())
+            {
+                var serviceType = kv.Key;
+                var serviceInstance = kv.Value;
+                EditorGUILayout.BeginHorizontal();
+                {
+                    EditorGUILayout.LabelField(serviceType.FullName);
+                    if (GUILayout.Button("Inspect", GUILayout.MaxWidth(80f)))
+                    {
+                        m_InspectedServiceType = serviceType;
+                        m_InspectedServiceInstance = serviceInstance;
+                        clickedAnyInspect = true;
+                    }
+                }
+
+                if (!clickedAnyInspect && serviceInstance == m_InspectedServiceInstance)
+                {
+                    lastInstanceExists = true;
+                }
+
+                EditorGUILayout.EndHorizontal();
+            }
+
+            if (!clickedAnyInspect && !lastInstanceExists)
+            {
                 m_InspectedServiceType = null;
                 m_InspectedServiceInstance = null;
             }
@@ -234,14 +271,14 @@ namespace COL.UnityGameWheels.Unity.Editor
         private bool DrawInspectorSection(UnityApp unityApp)
         {
             EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
-            var inspectedServiceDisplayName = string.IsNullOrEmpty(m_InspectedServiceName) ? "<nothing>" : m_InspectedServiceName;
+            var inspectedServiceDisplayName = m_InspectedServiceType == null ? "<nothing>" : m_InspectedServiceType.FullName;
             EditorGUILayout.LabelField($"Inspecting {inspectedServiceDisplayName}", EditorStyles.boldLabel);
             var ret = false;
 
             if (m_InspectedServiceType != m_LastInspectedServiceType)
             {
                 if (m_LastInspectedServiceType != null &&
-                    m_Inspectors.TryGetValue(m_LastInspectedServiceName, out var serviceInspector))
+                    m_Inspectors.TryGetValue(m_LastInspectedServiceType, out var serviceInspector))
                 {
                     serviceInspector.OnHide();
                 }
@@ -249,15 +286,15 @@ namespace COL.UnityGameWheels.Unity.Editor
 
             if (m_InspectedServiceType != m_LastInspectedServiceType && m_InspectedServiceType != null)
             {
-                var bindingData = unityApp.Container.GetBindingData(m_InspectedServiceName);
-                if (!m_Inspectors.TryGetValue(m_InspectedServiceName, out var serviceInspector) &&
+                var bindingData = unityApp.Container.GetBindingData(m_InspectedServiceType);
+                if (!m_Inspectors.TryGetValue(m_InspectedServiceType, out var serviceInspector) &&
                     !m_TriedToCreateInspectorTypes.Contains(bindingData.ImplType))
                 {
                     serviceInspector = CreateInspectorOrNull(bindingData);
                     m_TriedToCreateInspectorTypes.Add(bindingData.ImplType);
                     if (serviceInspector != null)
                     {
-                        m_Inspectors[m_InspectedServiceName] = serviceInspector;
+                        m_Inspectors[m_InspectedServiceType] = serviceInspector;
                     }
                 }
 
@@ -266,7 +303,7 @@ namespace COL.UnityGameWheels.Unity.Editor
 
             if (m_InspectedServiceType != null)
             {
-                m_Inspectors.TryGetValue(m_InspectedServiceName, out var serviceInspector);
+                m_Inspectors.TryGetValue(m_InspectedServiceType, out var serviceInspector);
                 if (serviceInspector != null)
                 {
                     EditorGUILayout.BeginVertical();
@@ -276,16 +313,14 @@ namespace COL.UnityGameWheels.Unity.Editor
             }
 
             m_LastInspectedServiceType = m_InspectedServiceType;
-            m_LastInspectedServiceName = m_InspectedServiceName;
             return ret;
         }
 
         private BaseServiceInspector CreateInspectorOrNull(IBindingData bindingData)
         {
             var implType = bindingData.ImplType;
-
-            var lifeCycleManaged = bindingData.LifeCycleManaged;
-            if (!lifeCycleManaged || !m_TypeToInspectorTypeMap.TryGetValue(implType, out var inspectorType))
+            if ((bindingData.LifeStyle != LifeStyles.Singleton && bindingData.LifeStyle != LifeStyles.Null) ||
+                !m_TypeToInspectorTypeMap.TryGetValue(implType, out var inspectorType))
             {
                 return null;
             }

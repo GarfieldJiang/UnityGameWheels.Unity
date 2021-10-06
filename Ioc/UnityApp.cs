@@ -35,5 +35,10 @@ namespace COL.UnityGameWheels.Unity.Ioc
             Instance = null;
             base.OnDestroy();
         }
+
+        protected static void StartTickingTickable(object serviceInstance)
+        {
+            ((ITickableService)serviceInstance).StartTicking();
+        }
     }
 }
