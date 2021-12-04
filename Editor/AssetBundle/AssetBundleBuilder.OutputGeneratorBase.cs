@@ -30,7 +30,7 @@
                 IList<AssetBundleInfoForIndex> assetBundleInfosForIndex,
                 IDictionary<string, AssetInfo> assetInfos)
             {
-                var directoryPath = Path.Combine(m_Builder.GetOutputDirectory(targetPlatform, internalResourceVersion), GeneratorDirectoryName);
+                var directoryPath = Path.Combine(m_Builder.GetOutputDirectory(targetPlatform, bundleVersion, internalResourceVersion), GeneratorDirectoryName);
 
                 if (Directory.Exists(directoryPath))
                 {

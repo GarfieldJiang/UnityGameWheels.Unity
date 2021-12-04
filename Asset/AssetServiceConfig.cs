@@ -97,6 +97,10 @@ namespace COL.UnityGameWheels.Unity.Asset
 
         public int UpdateSizeBeforeSavingReadWriteIndex => m_UpdateSizeBeforeSavingReadWriteIndex;
 
+        [SerializeField]
+        private string m_OverriddenBundleVersion = string.Empty;
+
+        public string OverriddenBundleVersion => m_OverriddenBundleVersion;
 
         private static string GetRunningPlatform(AssetServiceConfig config)
         {

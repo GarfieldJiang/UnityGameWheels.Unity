@@ -35,7 +35,9 @@ namespace COL.UnityGameWheels.Unity.Asset
             return container.BindSingleton<IAssetService, AssetService>()
                 .OnInstanceCreated(serviceInstance =>
                 {
-                    ((AssetService)serviceInstance).BundleVersion = Application.version;
+                    ((AssetService)serviceInstance).BundleVersion = string.IsNullOrWhiteSpace(config.OverriddenBundleVersion)
+                        ? Application.version
+                        : config.OverriddenBundleVersion;
                 })
                 .OnDisposed(() => { AssetBundle.UnloadAllAssetBundles(true); });
         }
