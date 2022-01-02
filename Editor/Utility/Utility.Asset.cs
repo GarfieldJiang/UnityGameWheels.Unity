@@ -15,6 +15,14 @@ namespace COL.UnityGameWheels.Unity.Editor
 
                 return field;
             }
+
+            public static bool IsEditorPath(string assetPath)
+            {
+                return assetPath.Contains("/Editor/")
+                       || assetPath.Contains("/Editor Default Resources/")
+                       || assetPath.EndsWith("/Editor")
+                       || assetPath.EndsWith("/Editor Default Resources");
+            }
         }
     }
 }

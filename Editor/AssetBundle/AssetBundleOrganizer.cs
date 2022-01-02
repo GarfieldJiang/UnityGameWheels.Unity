@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.U2D;
 using Object = UnityEngine.Object;
 
 namespace COL.UnityGameWheels.Unity.Editor
@@ -25,6 +26,15 @@ namespace COL.UnityGameWheels.Unity.Editor
         public static string ConfigPath =>
             s_ConfigPath ?? (s_ConfigPath = Utility.Config.Read<AssetBundleOrganizerConfigPathAttribute, string>() ?? DefaultConfigPath);
 
+
+        private const string DefaultIgnoreAssetLabel = "IgnoredByAssetBundleOrganizer";
+        private static string s_IgnoreAssetLabel = null;
+
+        public static string IgnoreAssetLabel =>
+            s_IgnoreAssetLabel ?? (s_IgnoreAssetLabel =
+                Utility.Config.Read<AssetBundleOrganizerIgnoreAssetLabelAttribute, string>() ?? DefaultIgnoreAssetLabel);
+
+
         private AssetBundleOrganizerConfig m_Config = new AssetBundleOrganizerConfig();
         private AssetBundleOrganizerConfigCache m_ConfigCache = null;
 
@@ -34,7 +44,7 @@ namespace COL.UnityGameWheels.Unity.Editor
 
         public IList<AssetInfo> AssetInfoForestRoots => m_AssetInfoForestRoots.AsReadOnly();
 
-        private readonly AssetBundleInfo m_AssetBundleInfoTreeRoot = new AssetBundleInfo {IsDirectory = true, Parent = null, Path = string.Empty};
+        private readonly AssetBundleInfo m_AssetBundleInfoTreeRoot = new AssetBundleInfo { IsDirectory = true, Parent = null, Path = string.Empty };
 
         public AssetBundleInfo AssetBundleInfoTreeRoot => m_AssetBundleInfoTreeRoot;
 
@@ -123,9 +133,11 @@ namespace COL.UnityGameWheels.Unity.Editor
             NormalizeRootAssetDirectories();
             m_AssetInfoForestRoots.Clear();
             m_IncludedAssetGuidToInfoMap.Clear();
+            var labeledToIgnoreAssets = new HashSet<string>(AssetDatabase.FindAssets("l:" + IgnoreAssetLabel)
+                .Select(AssetDatabase.GUIDToAssetPath));
             foreach (var pair in m_ConfigCache.RootDirectoryInfos)
             {
-                BuildAssetTree(pair);
+                BuildAssetTree(pair, labeledToIgnoreAssets);
             }
 
             //LogAssetInfoForest();
@@ -416,7 +428,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                 throw new InvalidOperationException("Oops, cannot find the raw asset bundle info.");
             }
 
-            return rawAssetBundleInfo.AssetGuids.ConvertAll(guid => new AssetInfoInBundle {Guid = guid});
+            return rawAssetBundleInfo.AssetGuids.ConvertAll(guid => new AssetInfoInBundle { Guid = guid });
         }
 
         public void AssignAssetsToBundle(IList<AssetInfo> assetInfos, string assetBundlePath)
@@ -491,7 +503,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                 rawAssetBundleInfo.AssetGuids.Add(assetInfo.Guid);
                 if (!m_ConfigCache.AssetInfos.TryGetValue(assetInfo.Guid, out var rawAssetInfo))
                 {
-                    rawAssetInfo = new AssetBundleOrganizerConfig.AssetInfo {Guid = assetInfo.Guid, AssetBundlePath = assetBundleInfo.Path};
+                    rawAssetInfo = new AssetBundleOrganizerConfig.AssetInfo { Guid = assetInfo.Guid, AssetBundlePath = assetBundleInfo.Path };
                     m_ConfigCache.AssetInfos.Add(rawAssetInfo.Guid, rawAssetInfo);
                 }
                 else
@@ -508,7 +520,7 @@ namespace COL.UnityGameWheels.Unity.Editor
         {
             int assetRemoveCount = 0;
             var toRemove = m_ConfigCache.AssetInfos.Values.Where(
-                ai => (new BaseAssetInfo {Guid = ai.Guid}.IsNullOrMissing) || !m_IncludedAssetGuidToInfoMap.ContainsKey(ai.Guid)).ToList();
+                ai => (new BaseAssetInfo { Guid = ai.Guid }.IsNullOrMissing) || !m_IncludedAssetGuidToInfoMap.ContainsKey(ai.Guid)).ToList();
             foreach (var assetInfo in toRemove)
             {
                 m_ConfigCache.AssetInfos.Remove(assetInfo.Guid);
@@ -519,7 +531,7 @@ namespace COL.UnityGameWheels.Unity.Editor
             foreach (var abi in m_ConfigCache.AssetBundleInfos.Values)
             {
                 assetInBundleRemoveCount += abi.AssetGuids.RemoveAll(
-                    guid => (new BaseAssetInfo {Guid = guid}.IsNullOrMissing || !m_IncludedAssetGuidToInfoMap.ContainsKey(guid)));
+                    guid => (new BaseAssetInfo { Guid = guid }.IsNullOrMissing || !m_IncludedAssetGuidToInfoMap.ContainsKey(guid)));
             }
 
             if (assetInBundleRemoveCount != assetRemoveCount)
@@ -695,7 +707,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                    && assetPath.StartsWith(AssetDatabase.GUIDToAssetPath(dirInfo.DirectoryGuid)));
         }
 
-        private void BuildAssetTree(AssetBundleOrganizerConfig.RootDirectoryInfo rootDir)
+        private void BuildAssetTree(AssetBundleOrganizerConfig.RootDirectoryInfo rootDir, HashSet<string> labeledToIgnoreAssets)
         {
             if (rootDir.DirectoryGuid == null)
             {
@@ -729,7 +741,7 @@ namespace COL.UnityGameWheels.Unity.Editor
             m_AssetInfoForestRoots.Add(root);
             m_IncludedAssetGuidToInfoMap.Add(root.Guid, root);
 
-            var assetGuids = AssetDatabase.FindAssets(rootDir.Filter, new[] {root.Path});
+            var assetGuids = AssetDatabase.FindAssets(rootDir.Filter, new[] { root.Path });
             foreach (var assetGuid in assetGuids)
             {
                 var assetPath = AssetDatabase.GUIDToAssetPath(assetGuid);
@@ -749,7 +761,12 @@ namespace COL.UnityGameWheels.Unity.Editor
                 }
 
                 var mainAssetType = AssetDatabase.GetMainAssetTypeAtPath(assetPath);
-                if (mainAssetType == typeof(MonoScript))
+                if (mainAssetType == typeof(MonoScript) || mainAssetType == typeof(SpriteAtlas))
+                {
+                    continue;
+                }
+
+                if (labeledToIgnoreAssets.Contains(assetPath))
                 {
                     continue;
                 }

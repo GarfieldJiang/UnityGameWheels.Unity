@@ -87,7 +87,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                     if (newAssetObj != assetObj)
                     {
                         var newAssetPath = AssetDatabase.GetAssetPath(newAssetObj);
-                        if (AssetDatabase.IsValidFolder(newAssetPath))
+                        if (AssetDatabase.IsValidFolder(newAssetPath) && !Utility.Asset.IsEditorPath(newAssetPath))
                         {
                             info.DirectoryGuid = AssetDatabase.AssetPathToGUID(newAssetPath);
                         }

@@ -126,14 +126,20 @@ namespace COL.UnityGameWheels.Unity.Editor
 
         private void UpdateUncollectedAssets(string assetGuid, AssetInfo dependingAssetInfo)
         {
-            if (AssetDatabase.GetMainAssetTypeAtPath(AssetDatabase.GUIDToAssetPath(assetGuid)) == typeof(MonoScript))
+            var assetPath = AssetDatabase.GUIDToAssetPath(assetGuid);
+            if (AssetDatabase.GetMainAssetTypeAtPath(assetPath) == typeof(MonoScript))
+            {
+                return;
+            }
+
+            if (Utility.Asset.IsEditorPath(assetPath))
             {
                 return;
             }
 
             if (!m_UncollectedAssetInfos.TryGetValue(assetGuid, out var uncollectedAssetInfo))
             {
-                uncollectedAssetInfo = new UncollectedAssetInfo {Guid = assetGuid};
+                uncollectedAssetInfo = new UncollectedAssetInfo { Guid = assetGuid };
                 m_UncollectedAssetInfos.Add(assetGuid, uncollectedAssetInfo);
             }
 
@@ -142,7 +148,7 @@ namespace COL.UnityGameWheels.Unity.Editor
 
         private AssetBundleInfo PopulateSingleAssetBundleInfo(AssetBundleOrganizerConfig.AssetBundleInfo abInfo)
         {
-            var ret = new AssetBundleInfo {Path = abInfo.AssetBundlePath, GroupId = abInfo.AssetBundleGroup, DontPack = abInfo.DontPack};
+            var ret = new AssetBundleInfo { Path = abInfo.AssetBundlePath, GroupId = abInfo.AssetBundleGroup, DontPack = abInfo.DontPack };
             var guidQueue = new Queue<string>(abInfo.AssetGuids);
             var guidSet = new HashSet<string>(guidQueue);
             //Debug.LogFormat("[AssetBundleDependencyChecker PopulateSingleAssetBundleInfo] ab path: {0}", abInfo.AssetBundlePath);
