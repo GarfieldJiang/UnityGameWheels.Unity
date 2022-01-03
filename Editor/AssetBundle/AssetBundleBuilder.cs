@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
+using COL.UnityGameWheels.Core;
 using UnityEditor;
 using UnityEngine;
 
@@ -35,6 +36,44 @@ namespace COL.UnityGameWheels.Unity.Editor
             s_ConfigPath ?? (s_ConfigPath =
                 Utility.Config.Read<AssetBundleBuilderConfigPathAttribute, string>() ??
                 DefaultConfigPath);
+
+        private static Func<IZipImpl> s_ZipImplFactoryMethod = null;
+
+        internal static Func<IZipImpl> ZipImplFactoryMethod
+        {
+            get
+            {
+                if (s_ZipImplFactoryMethod == null)
+                {
+                    s_ZipImplFactoryMethod = Utility.Config.ReadFactoryMethod<AssetBundleBuilderConfigPathAttribute, IZipImpl>();
+                    if (s_ZipImplFactoryMethod == null)
+                    {
+                        throw new InvalidOperationException("You must configure a factory method that creates a IZipImpl instance.");
+                    }
+                }
+
+                return s_ZipImplFactoryMethod;
+            }
+        }
+
+        private static IZipImpl s_IZipImpl;
+
+        internal static IZipImpl ZipImpl
+        {
+            get
+            {
+                if (s_IZipImpl == null)
+                {
+                    s_IZipImpl = ZipImplFactoryMethod();
+                    if (s_IZipImpl == null)
+                    {
+                        throw new InvalidOperationException("Factory method to create IZipImpl instances doesn't work right.");
+                    }
+                }
+
+                return s_IZipImpl;
+            }
+        }
 
         private static string s_DefaultWorkingDirectory = null;
 
@@ -129,11 +168,17 @@ namespace COL.UnityGameWheels.Unity.Editor
             {
                 // TODO: Use reflection on the enum ResourcePlatform to add all platforms.
                 m_Config.PlatformConfigs.Add(new AssetBundleBuilderConfig.PlatformConfig
-                    { TargetPlatform = ResourcePlatform.Standalone });
+                {
+                    TargetPlatform = ResourcePlatform.Standalone
+                });
                 m_Config.PlatformConfigs.Add(new AssetBundleBuilderConfig.PlatformConfig
-                    { TargetPlatform = ResourcePlatform.Android });
+                {
+                    TargetPlatform = ResourcePlatform.Android
+                });
                 m_Config.PlatformConfigs.Add(new AssetBundleBuilderConfig.PlatformConfig
-                    { TargetPlatform = ResourcePlatform.iOS });
+                {
+                    TargetPlatform = ResourcePlatform.iOS
+                });
             }
         }
 
@@ -176,8 +221,10 @@ namespace COL.UnityGameWheels.Unity.Editor
             bool autoIncrementResourceVersion, BuildAssetBundleOptions buildOptions, int overriddenResourceVersion = 0)
         {
             var logger = new Logger(this);
+
             var handler = CreateHandler();
             try
+
             {
                 var assetBundleInfos = BeforeBuild(handler, logger, out var assetInfos, out var buildMaps);
 
@@ -191,6 +238,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                 logger.Error("{0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
                 throw;
             }
+
             finally
             {
                 logger.Dispose();
@@ -203,8 +251,10 @@ namespace COL.UnityGameWheels.Unity.Editor
         public void BuildAll()
         {
             var logger = new Logger(this);
+
             var handler = CreateHandler();
             try
+
             {
                 var assetBundleInfos = BeforeBuild(handler, logger, out var assetInfos, out var buildMaps);
                 var cleanUpWorkingDirectoryAfterBuild = m_Config.CleanUpWorkingDirectoryAfterBuild;
@@ -231,6 +281,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                 logger.Error("{0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
                 throw;
             }
+
             finally
             {
                 logger.Dispose();
@@ -252,18 +303,16 @@ namespace COL.UnityGameWheels.Unity.Editor
             int resourceVersion = overriddenResourceVersion > 0 ? overriddenResourceVersion : GetInternalResourceVersion(bundleVersion, targetPlatform);
             logger.Info($"Internal resource version for bundle version '{bundleVersion}' and target platform '{targetPlatform}' is {resourceVersion}.");
             CallHandlerOnPreBuildPlatform(handler, logger, targetPlatform, resourceVersion);
-
             logger.Info($"Start building for '{targetPlatform}' target.", targetPlatform);
             logger.Info("Start building asset bundles.");
-            var manifest = BuildAssetBundles(buildMaps, targetPlatform, buildOptions);
 
+            var manifest = BuildAssetBundles(buildMaps, targetPlatform, buildOptions);
             if (manifest == null)
             {
                 logger.Error($"Failed to build asset bundles for '{targetPlatform}' target.");
             }
 
             logger.Info("Finish building asset bundles.");
-
             if (cleanUpWorkingDirectoryAfterBuild)
             {
                 logger.Info("Start cleaning up internal directory.");
@@ -272,13 +321,16 @@ namespace COL.UnityGameWheels.Unity.Editor
             }
 
             logger.Info("Start generating information used to build the index file.");
+
             IList<AssetBundleInfoForIndex> assetBundleInfosForIndex =
                 GenerateAssetBundleInfosForIndex(assetBundleInfos, manifest, targetPlatform);
-            logger.Info("Finish generating information used to build the index file.");
 
+            logger.Info("Finish generating information used to build the index file.");
             logger.Info("Start generating output.");
+
             GenerateOutput(bundleVersion, targetPlatform, resourceVersion,
                 assetBundleInfosForIndex, assetInfos);
+
             logger.Info("Finish generating output.");
 
             var currentResourceVersion = resourceVersion;
@@ -289,7 +341,6 @@ namespace COL.UnityGameWheels.Unity.Editor
             }
 
             logger.Info($"Finish building for '{targetPlatform}' target.");
-
             CallHandlerOnPostBuildPlatform(handler, logger, targetPlatform, currentResourceVersion, OutputDirectory);
         }
 
@@ -303,10 +354,10 @@ namespace COL.UnityGameWheels.Unity.Editor
             var assetBundleInfos = provider.AssetBundleInfos;
             assetInfos = provider.AssetInfos;
             logger.Info("Finish populating asset bundle infos.");
-
             logger.Info("Start generating unity build maps.");
             buildMaps = GenerateBuildMaps(assetBundleInfos);
             logger.Info("Finish generating unity build maps.");
+
             CallHandlerOnPostBeforeBuild(handler, logger, buildMaps);
             return assetBundleInfos;
         }
@@ -443,6 +494,7 @@ namespace COL.UnityGameWheels.Unity.Editor
         {
             var platformInternalDir = GetPlatformInternalDirectory(targetPlatform);
             var directoryInfo = Directory.CreateDirectory(platformInternalDir);
+
             var directoryUrl = new Uri(directoryInfo.FullName + Path.DirectorySeparatorChar, UriKind.Absolute);
             foreach (var fileInfo in directoryInfo.GetFiles("*", SearchOption.AllDirectories))
             {
@@ -473,13 +525,15 @@ namespace COL.UnityGameWheels.Unity.Editor
                 internalResourceVersion,
                 assetBundleInfosForIndex,
                 assetInfos);
+
             new OutputGeneratorInstaller(this, ClientFullFolderName, false).Run(
                 bundleVersion,
                 targetPlatform,
                 internalResourceVersion,
                 assetBundleInfosForIndex,
                 assetInfos);
-            new OutputGeneratorRemote(this, ServerFolderName).Run(
+
+            new OutputGeneratorRemote(this, ServerFolderName, ZipImpl).Run(
                 bundleVersion,
                 targetPlatform,
                 internalResourceVersion,

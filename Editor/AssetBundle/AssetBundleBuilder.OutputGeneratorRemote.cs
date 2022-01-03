@@ -1,4 +1,6 @@
-﻿namespace COL.UnityGameWheels.Unity.Editor
+﻿using COL.UnityGameWheels.Core;
+
+namespace COL.UnityGameWheels.Unity.Editor
 {
     using Asset;
     using Core.Asset;
@@ -11,11 +13,12 @@
     {
         private class OutputGeneratorRemote : OutputGeneratorBase
         {
+            private IZipImpl m_ZipImpl;
 
-            public OutputGeneratorRemote(AssetBundleBuilder builder, string generatorDirectoryName)
+            public OutputGeneratorRemote(AssetBundleBuilder builder, string generatorDirectoryName, IZipImpl zipImpl)
                 : base(builder, generatorDirectoryName)
             {
-                // Empty.
+                m_ZipImpl = zipImpl;
             }
 
             protected override void CopyFiles(ResourcePlatform targetPlatform, IList<AssetBundleInfoForIndex> assetBundleInfosForIndex,
@@ -74,8 +77,27 @@
                     "{0}_{1}{2}", Path.GetFileNameWithoutExtension(IndexFileName), (uint)crc32, Path.GetExtension(IndexFileName));
                 var newIndexPath = Path.Combine(Path.GetDirectoryName(indexPath), newIndexName);
                 File.Move(indexPath, newIndexPath);
-
                 File.WriteAllText(newIndexPath + ".json", JsonConvert.SerializeObject(assetIndex, Formatting.Indented));
+
+                using (var ms = new MemoryStream())
+                {
+                    using (var indexFs = File.OpenRead(newIndexPath))
+                    {
+                        m_ZipImpl.Zip(indexFs, ms);
+                    }
+
+                    ms.Seek(0L, SeekOrigin.Begin);
+                    var zippedCrc32 = Algorithm.Crc32.Sum(ms);
+                    var zippedIndexName = Core.Utility.Text.Format("{0}_{1}{2}",
+                        Path.GetFileNameWithoutExtension(IndexFileName), (uint)zippedCrc32,
+                        Path.GetExtension(Constant.CachedRemoteIndexZipFileName));
+                    var zippedIndexPath = Path.Combine(Path.GetDirectoryName(indexPath), zippedIndexName);
+                    ms.Seek(0L, SeekOrigin.Begin);
+                    using (var zippedIndexFs = File.OpenWrite(zippedIndexPath))
+                    {
+                        ms.WriteTo(zippedIndexFs);
+                    }
+                }
             }
         }
     }

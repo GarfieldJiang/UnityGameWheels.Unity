@@ -31,13 +31,22 @@
                     {
                         throw new InvalidOperationException(
                             Core.Utility.Text.Format("Attribute '{0}' should not be used on an unreadable property '{1}' of class '{2}'.",
-                            typeof(TAttribute), property.Name, property.DeclaringType.FullName));
+                                typeof(TAttribute), property.Name, property.DeclaringType.FullName));
                     }
 
                     return (TConfig)property.GetValue(null, null);
                 }
 
                 return default(TConfig);
+            }
+
+            public static Func<TReturn> ReadFactoryMethod<TAttribute, TReturn>() where TAttribute : ConfigReadAttribute
+            {
+                var method = AppDomain.CurrentDomain.GetAssemblies()
+                    .SelectMany(a => a.GetTypes())
+                    .SelectMany(t => t.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
+                    .FirstOrDefault(mi => mi.GetParameters().Length == 0 && mi.ReturnType == typeof(TReturn));
+                return method == null ? null : (Func<TReturn>)Delegate.CreateDelegate(typeof(Func<TReturn>), method);
             }
         }
     }
