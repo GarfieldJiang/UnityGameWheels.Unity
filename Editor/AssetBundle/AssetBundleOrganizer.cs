@@ -548,13 +548,14 @@ namespace COL.UnityGameWheels.Unity.Editor
         {
             var segments = assetBundlePath.Split('/');
             var node = m_AssetBundleInfoTreeRoot;
-            foreach (var segment in segments)
+            for (int i = 0; i < segments.Length; i++)
             {
-                node = node.Children[segment];
-                if (node == null)
+                if (!node.Children.TryGetValue(segments[i], out var nextNode) || nextNode == null)
                 {
                     return null;
                 }
+
+                node = nextNode;
             }
 
             return node;
