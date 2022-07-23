@@ -141,8 +141,16 @@ namespace COL.UnityGameWheels.Unity.Editor
 
         public AssetBundleBuilderConfig Config => m_Config;
 
-        public AssetBundleBuilder()
+        private readonly AssetBundleInfosProvider m_InfosProvider = null;
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="infosProvider">An <see cref="AssetBundleInfosProvider"/> instance already populated with all data.
+        /// If this provider is not provided, one will be created and populated in the method <see cref="PopulateAssetBundleInfos"/> during build. </param>
+        public AssetBundleBuilder(AssetBundleInfosProvider infosProvider = null)
         {
+            m_InfosProvider = infosProvider;
             LoadConfig();
             EnsureDirectories();
         }
@@ -364,6 +372,12 @@ namespace COL.UnityGameWheels.Unity.Editor
 
         private AssetBundleInfosProvider PopulateAssetBundleInfos()
         {
+            // We assume that m_InfosProvider has been populated, if provided.
+            if (m_InfosProvider != null)
+            {
+                return m_InfosProvider;
+            }
+
             var organizer = new AssetBundleOrganizer();
             organizer.RefreshAssetForest();
             organizer.RefreshAssetBundleTree();
