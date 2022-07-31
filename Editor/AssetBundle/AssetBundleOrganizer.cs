@@ -44,17 +44,25 @@ namespace COL.UnityGameWheels.Unity.Editor
 
         public IList<AssetInfo> AssetInfoForestRoots => m_AssetInfoForestRoots.AsReadOnly();
 
-        private readonly AssetBundleInfo m_AssetBundleInfoTreeRoot = new AssetBundleInfo { IsDirectory = true, Parent = null, Path = string.Empty };
+        private readonly AssetBundleInfo m_AssetBundleInfoTreeRoot;
 
         public AssetBundleInfo AssetBundleInfoTreeRoot => m_AssetBundleInfoTreeRoot;
 
         private readonly Dictionary<string, AssetInfo> m_IncludedAssetGuidToInfoMap = new Dictionary<string, AssetInfo>();
         private readonly XmlSerializer m_ConfigSerializer = new XmlSerializer(typeof(AssetBundleOrganizerConfig));
 
-        public AssetBundleOrganizer()
+        /// <summary>
+        /// Whether child nodes in the asset trees and the asset bundle tree should be sorted.
+        /// </summary>
+        public readonly bool ShouldSortTree;
+
+        public AssetBundleOrganizer(bool shouldSortTree = false)
         {
+            ShouldSortTree = shouldSortTree;
+            m_AssetBundleInfoTreeRoot = new AssetBundleInfo(shouldSortTree) { IsDirectory = true, Parent = null, Path = string.Empty };
             LoadConfig();
         }
+
 
         private void LoadConfig()
         {
@@ -165,7 +173,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                     else
                     {
                         var newAssetPath = m_AssetBundleInfoTreeRoot.Path + currentRelPath;
-                        var newNode = new AssetBundleInfo
+                        var newNode = new AssetBundleInfo(ShouldSortTree)
                         {
                             Path = newAssetPath,
                             Name = segment,
@@ -265,7 +273,7 @@ namespace COL.UnityGameWheels.Unity.Editor
 
             var segments = assetBundlePath.Split('/');
 
-            var assetBundleInfo = new AssetBundleInfo
+            var assetBundleInfo = new AssetBundleInfo(ShouldSortTree)
             {
                 Name = segments[segments.Length - 1],
                 Path = assetBundlePath,
@@ -639,7 +647,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                 {
                     if (!node.Children.ContainsKey(segment))
                     {
-                        node.Children.Add(segment, new AssetBundleInfo
+                        node.Children.Add(segment, new AssetBundleInfo(ShouldSortTree)
                         {
                             Name = segment,
                             Path = path,
@@ -727,7 +735,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                 return;
             }
 
-            var root = new AssetInfo
+            var root = new AssetInfo(ShouldSortTree)
             {
                 Guid = rootDir.DirectoryGuid,
                 Name = rootDirAssetObj.name,
@@ -790,7 +798,7 @@ namespace COL.UnityGameWheels.Unity.Editor
                     {
                         var newAssetPath = root.Path + "/" + currentRelPath;
                         var guid = AssetDatabase.AssetPathToGUID(newAssetPath);
-                        var newNode = new AssetInfo
+                        var newNode = new AssetInfo(ShouldSortTree)
                         {
                             Name = segment,
                             Guid = guid,
@@ -821,13 +829,8 @@ namespace COL.UnityGameWheels.Unity.Editor
                     continue;
                 }
 
-                foreach (var assetInfo2 in m_ConfigCache.AssetInfos.Values.Where(ai => AssetDatabase.GUIDToAssetPath(ai.Guid) == child.Path)
-                    .ToList())
-                {
-                    m_ConfigCache.AssetInfos.Remove(assetInfo2.Guid);
-                }
-
-                rawAssetBundleInfo.AssetGuids.RemoveAll(guid => AssetDatabase.GUIDToAssetPath(guid) == child.Path);
+                m_ConfigCache.AssetInfos.Remove(child.Guid);
+                rawAssetBundleInfo.AssetGuids.RemoveAll(guid => guid == child.Guid);
                 RemoveSameBundlePathInAssetInfoTree(child, rawAssetBundleInfo);
                 child.AssetBundlePath = string.Empty;
             }

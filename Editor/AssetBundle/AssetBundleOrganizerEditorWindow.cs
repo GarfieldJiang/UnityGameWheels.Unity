@@ -188,7 +188,7 @@ namespace COL.UnityGameWheels.Unity.Editor
             m_DrawColumnDelegates[2] = m_AssetBundlesSection.Draw;
             m_DrawColumnDelegates[3] = m_AssetBundleContentsSection.Draw;
 
-            m_AssetBundleOrganizer = new AssetBundleOrganizer();
+            m_AssetBundleOrganizer = new AssetBundleOrganizer(true);
             RefreshAssetForest();
             RefreshAssetBundleTree();
 

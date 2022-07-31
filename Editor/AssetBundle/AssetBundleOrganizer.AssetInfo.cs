@@ -24,10 +24,14 @@
 
             string IAssetInfo.Name => m_Base.Name;
 
+            public AssetInfo(bool sorted) : base(sorted)
+            {
+            }
+
             public override string ToString()
             {
-                return Core.Utility.Text.Format("[AssetInfo AssetPath='{0}', Name='{1}', GuidStr={2}, IsRoot={3}, AssetBundlePath='{4}']",
-                    Path, Name, Guid, IsRoot, AssetBundlePath);
+                return
+                    $"[AssetInfo Path='{Path}', Name='{Name}', GuidStr={Guid}, IsRoot={IsRoot}, AssetBundlePath='{AssetBundlePath}', IsSorted={IsSorted}.]";
             }
         }
     }

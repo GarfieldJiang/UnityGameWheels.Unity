@@ -9,10 +9,14 @@
             public bool DontPack { get; internal set; }
             public bool IsDirectory { get; internal set; }
 
+            public AssetBundleInfo(bool sorted) : base(sorted)
+            {
+            }
+
             public override string ToString()
             {
-                return Core.Utility.Text.Format("[AssetBundleInfo Path={0}, Name={1}, Group={2}, DontContainInInstaller={3}, IsDirectory={4}, IsRoot={5}]",
-                    Path, Name, GroupId, DontPack, IsDirectory, IsRoot);
+                return $"[AssetBundleInfo Path={Path}, Name={Name}, Group={GroupId}, DontContainInInstaller={DontPack}, " +
+                       $"IsDirectory={IsDirectory}, IsRoot={IsRoot}, IsSorted={IsSorted}]";
             }
         }
     }
