@@ -307,15 +307,14 @@ namespace COL.UnityGameWheels.Unity.Editor
                 return false;
             }
 
-            RemoveAssetBundleInfoFromTree(node);
 
             foreach (var toRemove in m_ConfigCache.AssetInfos.Values.Where(ai => ai.AssetBundlePath == assetBundlePath).ToList())
             {
-                m_ConfigCache.AssetInfos.Remove(toRemove.Guid);
-                m_IncludedAssetGuidToInfoMap[toRemove.Guid].AssetBundlePath = string.Empty;
+                UnassignAssetFromBundle(GetAssetInfo(toRemove.Guid));
             }
 
             m_ConfigCache.AssetBundleInfos.Remove(assetBundlePath);
+            RemoveAssetBundleInfoFromTree(node);
             return true;
         }
 
